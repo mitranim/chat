@@ -21,7 +21,7 @@ export function renderTo (selector: string) {
 function onDocumentReady (callback: () => void): void {
   if (/loaded|complete|interactive/.test(document.readyState)) callback()
   document.addEventListener('DOMContentLoaded', function cb () {
-    document.removeEventListener(cb)
+    document.removeEventListener('DOMContentLoaded', cb)
     callback()
   })
 }
@@ -55,7 +55,7 @@ export class Component extends React.Component {
   }
 
   componentWillUnmount () {
-    this._unsubs.forEach(unsub => {unsub()})
+    while (this._unsubs.length) this._unsubs.shift()()
   }
 }
 

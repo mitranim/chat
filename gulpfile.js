@@ -150,10 +150,7 @@ gulp.task('styles:watch', function () {
 /* --------------------------------- HTML -----------------------------------*/
 
 gulp.task('html:clear', function (done) {
-  del([
-    dest.html + '/**/*.html',
-    '!' + dest.app + '/**/*'
-  ]).then((_) => {done()})
+  del(dest.html + '/**/*.html').then((_) => {done()})
 })
 
 gulp.task('html:compile', function () {
