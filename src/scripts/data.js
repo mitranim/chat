@@ -15,6 +15,8 @@ export const auth = Reflux.createStore({
 
   init () {
     rootRef.onAuth(authData => {
+      // Regard 'anonymous' as not logged in.
+      if (authData && authData.provider === 'anonymous') authData = null
       this.data = authData
       this.ready = true
       this.trigger()

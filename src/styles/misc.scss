@@ -4,7 +4,7 @@ html {
 
 .chat-container {
   // Layout.
-  max-height: 100vh;
+  height: 100vh;
   width: 100%;
   @media (min-width: $screen-md-min) {
     width: 80%;
