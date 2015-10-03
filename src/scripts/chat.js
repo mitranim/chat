@@ -17,7 +17,7 @@ export class MessageList extends React.Component {
       _.assign({}, message, {
         id: id,
         imageUrls: typeof message.body === 'string' ?
-                   message.body.match(/https?:\/\/[./\w]+\.(?:jpg|jpeg|png|gif|bmp)/ig) : []
+                   message.body.match(/https?:\/\/[./\w-]+\.(?:jpg|jpeg|png|gif|bmp)/ig) : []
       })
     )), 'timestamp')
 
