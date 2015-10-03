@@ -1,12 +1,12 @@
 ```sh
-git clone <...> && cd ...
+git clone https://github.com/Mitranim/chat.git && cd chat
 npm i
 npm start
 ```
 
 This is backed by Firebase; here's the security rules:
 
-```json
+```js
 "chat": {
   ".read": true,
   "$messageId": {
