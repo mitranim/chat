@@ -67,6 +67,9 @@ html {
 
 a.fa {
   color: inherit;
+  &:hover {
+    text-decoration: none;
+  }
 }
 
 .fa-twitter {
@@ -80,6 +83,13 @@ a.fa {
   @include transitions(color);
   &:hover {
     color: $color-facebook;
+  }
+}
+
+.fa-github {
+  @include transitions(color);
+  &:hover {
+    color: $color-github;
   }
 }
 

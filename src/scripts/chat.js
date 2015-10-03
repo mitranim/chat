@@ -40,7 +40,7 @@ export class MessageList extends React.Component {
               </p>
               <p>{message.body}</p>
               {_.map(message.imageUrls, url => (
-                <img src={url} className='message-image-embed' key={url} />
+                <img src={url} className='message-image-embed' onLoad={::this.scrollToBottom} key={url} />
               ))}
             </div>
 
@@ -85,7 +85,10 @@ export class Chat extends Component {
 
     return (
       <div className='chat-container'>
-        <h2 className='text-center'>🎉🎊💥</h2>
+        <h2 className='text-center'>
+          <span>🎉🎊💥</span>
+          <a href='https://github.com/Mitranim/chat' target='_blank' className='pull-right fa fa-github' />
+        </h2>
 
         {messages.count ?
         <p>Total messages: {messages.count}</p> :
