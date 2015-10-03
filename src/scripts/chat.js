@@ -33,7 +33,7 @@ export class MessageList extends React.Component {
                 `list-group-item row-between-center
                  ${this.ownMessage(message) ? 'list-group-item-success' : 'list-group-item-info'}`}
                key={message.id}>
-            <div className='inline-block flex-1 typographic-container'>
+            <div className='flex-1 typographic-container'>
               <p>
                 <strong>{message.authorName}</strong>
                 <span className='text-muted'> at {new Date(message.timestamp).toLocaleString()}</span>
