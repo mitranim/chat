@@ -12,9 +12,13 @@ export class MessageList extends React.Component {
   }
 
   render () {
-    // Ensure that messages are ordered by timestamps.
+    // Ensure that messages are ordered by timestamps, find links to images.
     const sortedMessages = _.sortBy(_.map(this.props.messages, (message, id) => (
-      _.assign({}, message, {id: id})
+      _.assign({}, message, {
+        id: id,
+        imageUrls: typeof message.body === 'string' ?
+                   message.body.match(/https?:\/\/[./\w]+\.(?:jpg|jpeg|png|gif|bmp)/ig) : []
+      })
     )), 'timestamp')
 
     // Every time the message list is re-rendered, scroll to the bottom.
@@ -35,6 +39,9 @@ export class MessageList extends React.Component {
                 <span className='text-muted'> at {new Date(message.timestamp).toLocaleString()}</span>
               </p>
               <p>{message.body}</p>
+              {_.map(message.imageUrls, url => (
+                <img src={url} className='message-image-embed' key={url} />
+              ))}
             </div>
 
             {/* For own messages, display a dismiss button */}

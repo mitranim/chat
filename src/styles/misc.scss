@@ -31,7 +31,18 @@ html {
     flex: 1;
     overflow-x: hidden;
     overflow-y: scroll;
+
+    // Offset the close button.
+    button.close {
+      margin-left: 1rem;
+    }
   }
+}
+
+.message-image-embed {
+  max-width: 100%;
+  float: right;
+  clear: both;
 }
 
 .row-between-center {
