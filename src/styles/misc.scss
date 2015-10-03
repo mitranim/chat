@@ -1,0 +1,77 @@
+html {
+  font-weight: $font-weight;
+}
+
+.chat-container {
+  // Layout.
+  max-height: 100vh;
+  width: 100%;
+  @media (min-width: $screen-md-min) {
+    width: 80%;
+  }
+  @media (min-width: $screen-lg-min) {
+    width: 60%;
+  }
+  margin-left: auto;
+  margin-right: auto;
+
+  // Inner layout.
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  // Whitespace.
+  padding: 1rem;
+
+  > * {flex: none}
+
+  // Stretch to fill the available space.
+  .messages-list {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+}
+
+.row-between-center {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-none {
+  flex: none;
+}
+
+.typographic-container {
+  > * {margin-bottom: 1rem}
+  > :last-child {margin-bottom: 0}
+}
+
+a.fa {
+  color: inherit;
+}
+
+.fa-twitter {
+  @include transitions(color);
+  &:hover {
+    color: $color-twitter;
+  }
+}
+
+.fa-facebook {
+  @include transitions(color);
+  &:hover {
+    color: $color-facebook;
+  }
+}
+
+.pointer {
+  cursor: pointer;
+}
