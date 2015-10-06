@@ -7,28 +7,32 @@ import {rootRef, chatRef, auth, messages} from './data'
 export class MessageList extends React.Component {
   static propTypes = {
     authData: PropTypes.object,
-    messages: PropTypes.object,
+    messages: PropTypes.array,
     handleError: PropTypes.func
   }
 
-  render () {
-    // Ensure that messages are ordered by timestamps, find links to images.
-    const sortedMessages = _.sortBy(_.map(this.props.messages, (message, id) => (
-      _.assign({}, message, {
-        id: id,
-        imageUrls: typeof message.body === 'string' ?
-                   message.body.match(/https?:\/\/\S+\.(?:jpg|jpeg|png|gif|bmp)/ig) : []
-      })
-    )), 'timestamp')
-
-    // Every time the message list is re-rendered, scroll to the bottom.
+  // Scroll to the bottom after the first render.
+  componentDidMount () {
     window.requestAnimationFrame(() => {
       this.scrollToBottom()
     })
+  }
 
+  // Scroll to the bottom when messages change.
+  componentWillReceiveProps (props, state) {
+    if (props && props.messages) {
+      if (!_.isEqual(props.messages, this.props.messages)) {
+        window.requestAnimationFrame(() => {
+          this.scrollToBottom()
+        })
+      }
+    }
+  }
+
+  render () {
     return (
       <div className='list-group messages-list'>
-        {_.map(sortedMessages, message => (
+        {_.map(messages.data, message => (
           <div className={
                 `list-group-item row-between-center
                  ${this.ownMessage(message) ? 'list-group-item-success' : 'list-group-item-info'}`}
@@ -90,11 +94,11 @@ export class Chat extends Component {
           <a href='https://github.com/Mitranim/chat' target='_blank' className='pull-right fa fa-github' />
         </h2>
 
-        {messages.count ?
-        <p>Total messages: {messages.count}</p> :
+        {messages.data.length ?
+        <p>Total messages: {messages.data.length}</p> :
         <p>There are no messages yet. Be the first!</p>}
 
-        {messages.count ?
+        {messages.data.length ?
         <MessageList authData={auth.data} messages={messages.data} handleError={this.handleError} /> : null}
 
         {/* Error messages go here */}

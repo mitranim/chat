@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Firebase from 'firebase'
 import Reflux from 'reflux'
 
@@ -33,21 +34,30 @@ export const auth = Reflux.createStore({
 // Chat messages store.
 export const messages = Reflux.createStore({
   // Main data.
-  data: {},
-
-  // Total number of messages.
-  count: 0,
+  data: [],
 
   // Flips after the first data read.
   ready: false,
 
   init () {
     chatRef.on('value', snap => {
-      this.data = snap.val()
-      this.count = snap.numChildren()
+      this.data = this.transformMessages(snap.val())
       this.ready = true
       this.trigger()
     })
+  },
+
+  // Sorts the received messages and enriches them with extra data.
+  transformMessages (messageMap) {
+    // Ensure that messages are ordered by timestamps.
+    return _.sortBy(_.map(messageMap, (message, id) => (
+      _.assign({}, message, {
+        id: id,
+        // Find links to images, if any.
+        imageUrls: typeof message.body === 'string' ?
+                   message.body.match(/https?:\/\/\S+\.(?:jpg|jpeg|png|gif|bmp)/ig) : []
+      })
+    )), 'timestamp')
   }
 })
 
