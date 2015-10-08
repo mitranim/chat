@@ -11,7 +11,7 @@
 const $ = require('gulp-load-plugins')()
 const bsync = require('browser-sync').create()
 const del = require('del')
-const flags = require('yargs').argv
+const flags = require('yargs').boolean('prod').argv
 const gulp = require('gulp')
 const pt = require('path')
 const webpack = require('webpack')
@@ -34,20 +34,9 @@ const dest = {
   fonts: 'dist/fonts'
 }
 
-function prod () {
-  return flags.prod === true || flags.prod === 'true'
-}
-
 function reload (done) {
   bsync.reload()
   done()
-}
-
-/* *************************** Template Imports ******************************/
-
-// Utility methods for templates.
-const imports = {
-  prod: prod
 }
 
 /* ********************************* Tasks ***********************************/
@@ -58,7 +47,7 @@ function scripts (done) {
   const alias = {
     /* ... */
   }
-  if (prod()) alias.react = 'react/dist/react.min'
+  if (flags.prod) alias.react = 'react/dist/react.min'
 
   webpack({
     entry: './' + src.scriptsCore,
@@ -94,8 +83,8 @@ function scripts (done) {
         }
       ]
     },
-    plugins: prod() ? [new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})] : [],
-    // devtool: !prod() && typeof done !== 'function' ? 'inline-source-map' : null,
+    plugins: flags.prod ? [new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})] : [],
+    // devtool: !flags.prod && typeof done !== 'function' ? 'inline-source-map' : null,
     watch: typeof done !== 'function'
   }, function (err, stats) {
     if (err) {
@@ -131,7 +120,7 @@ gulp.task('styles:compile', function () {
     .pipe($.plumber())
     .pipe($.sass())
     .pipe($.autoprefixer())
-    .pipe($.if(prod(), $.minifyCss({
+    .pipe($.if(flags.prod, $.minifyCss({
       keepSpecialComments: 0,
       aggressiveMerging: false,
       advanced: false
@@ -157,7 +146,7 @@ gulp.task('html:compile', function () {
 
   return gulp.src(src.html)
     .pipe($.plumber())
-    .pipe($.statil({imports: imports}))
+    .pipe($.statil({imports: {prod: flags.prod}}))
     // Change each `<filename>` into `<filename>/index.html`.
     .pipe($.rename(function (path) {
       switch (path.basename + path.extname) {
@@ -166,7 +155,7 @@ gulp.task('html:compile', function () {
       path.dirname = pt.join(path.dirname, path.basename)
       path.basename = 'index'
     }))
-    .pipe($.if(prod(), $.minifyHtml({
+    .pipe($.if(flags.prod, $.minifyHtml({
       empty: true
     })))
     .pipe(gulp.dest(dest.html))
@@ -217,7 +206,7 @@ gulp.task('server', function () {
 
 /* -------------------------------- Default ---------------------------------*/
 
-if (prod()) {
+if (flags.prod) {
   gulp.task('build', gulp.parallel(
     'scripts:build', 'styles:build', 'html:build', 'fonts:build'
   ))
