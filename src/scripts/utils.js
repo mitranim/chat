@@ -1,4 +1,7 @@
-import React, {PropTypes} from 'react'
+import React from 'react'
+import {render} from 'react-dom'
+import _ from 'lodash'
+import {autorun, stop} from 'rapt'
 
 if (window.developmentMode) {
   window.React = React
@@ -9,8 +12,8 @@ if (window.developmentMode) {
 export function renderTo (selector: string) {
   return (Component: typeof React.Component) => {
     onDocumentReady(() => {
-      [].slice.call(document.querySelectorAll(selector)).forEach(element => {
-        React.render(<Component />, element)
+      _.each(document.querySelectorAll(selector), element => {
+        render(<Component />, element)
       })
     })
   }
@@ -19,57 +22,48 @@ export function renderTo (selector: string) {
 // Executes the given callback after the document is fully loaded, or
 // immediately (synchronously) if it's already loaded.
 function onDocumentReady (callback: () => void): void {
-  if (/loaded|complete|interactive/.test(document.readyState)) callback()
-  document.addEventListener('DOMContentLoaded', function cb () {
-    document.removeEventListener('DOMContentLoaded', cb)
+  if (/loaded|complete|interactive/.test(document.readyState)) {
     callback()
-  })
-}
-
-// Reactive component that automatically subscribes to / unsubscribes from
-// Reflux stores and actions.
-export class Component extends React.Component {
-  // Should be specified by the subclass.
-  subscriptions = []
-
-  // Utility properties.
-  _unsubs = []
-  _awaitingUpdate = false
-
-  // Uses throttling to prevent the UI from updating more than once per event
-  // loop tick. This prevents unnecessary work when multiple subscriptions
-  // update at once.
-  _forceUpdate = () => {
-    if (this._awaitingUpdate) return
-    this._awaitingUpdate = true
-    setTimeout(() => {
-      this._awaitingUpdate = false
-      this.forceUpdate()
-    }, 0)
-  }
-
-  componentWillMount () {
-    this.subscriptions.forEach(sub => {
-      this._unsubs.push(sub.listen(this._forceUpdate))
+  } else {
+    document.addEventListener('DOMContentLoaded', function cb () {
+      document.removeEventListener('DOMContentLoaded', cb)
+      callback()
     })
   }
+}
 
-  componentWillUnmount () {
-    while (this._unsubs.length) this._unsubs.shift()()
+/**
+ * Component method decorator for reactive updates. Usage:
+ *   class X extends React.Component {
+ *     @reactive
+ *     updateMe () {
+ *       ...
+ *     }
+ *   }
+ */
+export function reactive (prototype, name, {value: reactiveFunc}) {
+  if (typeof reactiveFunc !== 'function') return
+  const {componentWillMount: pre, componentWillUnmount: post} = prototype
+
+  prototype.componentWillMount = function () {
+    if (typeof pre === 'function') pre.call(this)
+    this[name] = reactiveFunc.bind(this)
+    autorun(this[name])
+  }
+
+  prototype.componentWillUnmount = function () {
+    stop(this[name])
+    if (typeof post === 'function') post.call(this)
   }
 }
 
 // Loading indicator.
-export class Spinner extends React.Component {
-  static propTypes = {
-    style: PropTypes.object
-  }
+export const Spinner = props => {
+  let {className = 'text-center', ...other} = props
 
-  render () {
-    return (
-      <div className='text-center' style={this.props.style || null}>
-        <div className='fa fa-spinner fa-spin' />
-      </div>
-    )
-  }
+  return (
+    <div className={className} {...other}>
+      <div className='fa fa-spinner fa-spin' />
+    </div>
+  )
 }
