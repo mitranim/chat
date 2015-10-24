@@ -47,7 +47,10 @@ function scripts (done) {
   const alias = {
     /* ... */
   }
-  if (flags.prod) alias.react = 'react/dist/react.min'
+  if (flags.prod) {
+    alias['react'] = 'react/dist/react.min'
+    alias['react-dom'] = 'react-dom/dist/react-dom.min'
+  }
 
   webpack({
     entry: './' + src.scriptsCore,
