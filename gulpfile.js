@@ -65,7 +65,11 @@ function scripts (done) {
       loaders: [
         {
           test: /\.jsx?$/,
-          exclude: /(node_modules|bower_components)/,
+          include: [
+            pt.resolve(process.cwd(), 'src/scripts'),
+            pt.resolve(process.cwd(), 'node_modules/rapt'),
+            pt.resolve(process.cwd(), 'node_modules/prax')
+          ],
           loader: 'babel',
           query: {
             modules: 'common',

@@ -1,7 +1,7 @@
 import React from 'react'
 import {render} from 'react-dom'
 import _ from 'lodash'
-import {autorun, stop} from 'rapt'
+import {autorun, stop} from 'prax'
 
 if (window.developmentMode) {
   window.React = React

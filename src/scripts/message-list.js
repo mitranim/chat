@@ -1,13 +1,12 @@
 import React, {PropTypes} from 'react'
 import {findDOMNode} from 'react-dom'
 import _ from 'lodash'
-import {chatRef} from './data'
+import {actions} from './actions'
 
 export class MessageList extends React.Component {
   static propTypes = {
     authData: PropTypes.object,
-    messages: PropTypes.array,
-    handleError: PropTypes.func
+    messages: PropTypes.array
   }
 
   // Scroll to the bottom after the first render.
@@ -49,15 +48,11 @@ export class MessageList extends React.Component {
 
             {/* For own messages, display a dismiss button */}
             {this.ownMessage(message) ?
-            <button className='flex-none close fa fa-times' onClick={() => {this.deleteMessage(message.id)}} /> : null}
+            <button className='flex-none close fa fa-times' onClick={() => {actions.delete(message.id)}} /> : null}
           </div>
         ))}
       </div>
     )
-  }
-
-  deleteMessage (id) {
-    chatRef.child(id).remove(this.props.handleError)
   }
 
   ownMessage (message) {
