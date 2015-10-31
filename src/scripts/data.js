@@ -1,112 +1,75 @@
 import _ from 'lodash'
-import Firebase from 'firebase'
-import {dispatch} from './store'
-import {signals} from './signals'
+import {createStore} from 'redux'
+import {readAtPath, replaceAtPath, mergeAtRoot} from 'emerge'
+import {Source} from 'prax-react'
 
 /**
- * Subscriptions
+ * Store
  */
 
-export const rootRef = new Firebase('https://incandescent-torch-3438.firebaseio.com')
-export const chatRef = rootRef.child('chat')
-
-/**
- * Auth
- */
-
-rootRef.onAuth(authData => {
-  // Regard 'anonymous' as not logged in.
-  if (authData && authData.provider === 'anonymous') authData = null
-  dispatch({
-    type: 'patch',
-    value: {
-      auth: transformAuthData(authData),
-      authReady: true
+// Central data store. This is the only place where state can be mutated.
+const store = createStore((state, action) => {
+  switch (action.type) {
+    case 'set': {
+      state = replaceAtPath(state, action.value, action.path)
+      break
     }
-  })
-})
-
-function transformAuthData (data) {
-  if (data) {
-    const details = data[data.provider]
-    data.fullName = details && details.displayName || ''
+    case 'patch': {
+      state = mergeAtRoot(state, action.value)
+      break
+    }
   }
-  return data
-}
-
-signals.logout.action(() => {rootRef.unauth()})
-
-signals.login.twitter.action(() => new Promise((resolve, reject) => {
-  rootRef.authWithOAuthRedirect('twitter', err => {
-    if (err) reject(err)
-    else resolve()
-  })
-}))
-
-signals.login.facebook.action(() => new Promise((resolve, reject) => {
-  rootRef.authWithOAuthRedirect('facebook', err => {
-    if (err) reject(err)
-    else resolve()
-  })
-}))
-
-/**
- * Messages
- */
-
-chatRef.on('value', snap => {
-  dispatch({
-    type: 'patch',
-    value: {
-      messages: transformMessages(snap.val()),
-      messagesReady: true
-    }
-  })
+  return state
 })
 
-// Sorts the received messages and enriches them with extra data.
-function transformMessages (messageMap) {
-  const messages = _.map(messageMap, (message, id) => ({
-    ...message,
-    id,
-    // Find links to images, if any.
-    imageUrls: typeof message.body === 'string' ?
-               message.body.match(/https?:\/\/\S+\.(?:jpg|jpeg|png|gif|bmp)/ig) : []
-  }))
-  // Ensure that messages are ordered by timestamps.
-  return _.sortBy(messages, 'timestamp')
-}
-
-signals.send.action(message => new Promise((resolve, reject) => {
-  chatRef.push(message, err => {
-    if (err) reject(err)
-    else resolve()
-  })
-}))
-
-signals.send.action(() => ({
-  type: 'patch',
-  value: {sending: true}
-}))
-
-signals.send.done(() => ({
-  type: 'patch',
-  value: {sending: false}
-}))
-
-signals.delete.action(id => new Promise((resolve, reject) => {
-  chatRef.child(id).remove(err => {
-    if (err) reject(err)
-    else resolve()
-  })
-}))
-
-/**
- * Utils
- */
+export const dispatch = store.dispatch
 
 if (window.developmentMode) {
-  window.Firebase = Firebase
-  window.rootRef = rootRef
-  window.chatRef = chatRef
+  window.store = store
 }
+
+/**
+ * Reactive data sources
+ */
+
+const readers = Object.create(null)
+
+class Reader {
+  constructor (path, store) {
+    this.path = path
+    this.store = store
+    this.source = new Source()
+    this.check()
+  }
+
+  read () {
+    return this.source.read()
+  }
+
+  check () {
+    const value = readAtPath(this.store.getState(), this.path)
+    // Thanks to emerge's referential equality, `===` is equivalent to deep
+    // equality between current and previous state.
+    if (value !== this.source.value) this.source.write(value)
+  }
+}
+
+// Reactive data source that reads data from the central store at the given
+// path. Example usage:
+// const value = read('one', 2, 'three')
+export function read (...path) {
+  const pt = path.join('.')
+  return (readers[pt] || (readers[pt] = new Reader(path, store))).read()
+}
+
+if (window.developmentMode) {
+  window.read = read
+}
+
+// On each change, update reactive data sources and purge any unneeded ones.
+store.subscribe(() => {
+  _.each(readers, (reader, key) => {
+    if (reader.source.beacon.readers.length) reader.check()
+    else delete readers[key]
+  })
+})

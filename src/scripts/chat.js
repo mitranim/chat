@@ -2,9 +2,9 @@ import React from 'react'
 import Firebase from 'firebase'
 import {reactive} from 'prax-react'
 
-import {read} from './store'
+import {read} from './data'
 import {renderTo, Spinner} from './utils'
-import {signals, done, error} from './signals'
+import {signals, done, error} from './actors'
 import {MessageList} from './message-list'
 
 @renderTo('[data-render-chat]')

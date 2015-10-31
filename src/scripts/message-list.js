@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import {findDOMNode} from 'react-dom'
 import _ from 'lodash'
-import {signals} from './signals'
+import {signals} from './actors'
 
 export class MessageList extends React.Component {
   static propTypes = {

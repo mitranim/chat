@@ -3,5 +3,4 @@ window.jQuery = require('jquery')
 require('bootstrap-sass')
 
 // Activate our components.
-import './data'
 import './chat'
