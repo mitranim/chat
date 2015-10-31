@@ -66,6 +66,7 @@ function scripts (done) {
           test: /\.jsx?$/,
           include: [
             pt.join(process.cwd(), 'src/scripts'),
+            /emerge\/lib/,
             /prax\/lib/,
             /rapt\/lib/
           ],
