@@ -31,7 +31,7 @@
     "jquery": "^3.0.0-alpha1",
     "lodash": "^3.10.1",
     "prax": "Mitranim/prax#2f6bae9ebd005b6e483e9d1e930209b4d1f1ed60",
-    "rapt": "Mitranim/rapt#c648a3f286deccb8ca12abece433bb0d2c52458e",
+    "rapt": "Mitranim/rapt#7f0a126ab875f195fad2d73e61b1607fe1b8238b",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "redux": "^3.0.4",
