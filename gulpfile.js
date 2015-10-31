@@ -2,8 +2,6 @@
 
 /**
  * Requires gulp 4.0: https://github.com/gulpjs/gulp/tree/4.0
- *
- * Style per http://standardjs.com
  */
 
 /* ***************************** Dependencies ********************************/
@@ -45,7 +43,8 @@ function reload (done) {
 
 function scripts (done) {
   const alias = {
-    /* ... */
+    'prax-react': pt.join(process.cwd(), 'node_modules/prax/lib/prax-react'),
+    'rapt-react': pt.join(process.cwd(), 'node_modules/rapt/lib/rapt-react')
   }
   if (flags.prod) {
     alias['react'] = 'react/dist/react.min'
@@ -66,27 +65,11 @@ function scripts (done) {
         {
           test: /\.jsx?$/,
           include: [
-            pt.resolve(process.cwd(), 'src/scripts'),
-            pt.resolve(process.cwd(), 'node_modules/rapt'),
-            pt.resolve(process.cwd(), 'node_modules/prax')
+            pt.join(process.cwd(), 'src/scripts'),
+            /prax\/lib/,
+            /rapt\/lib/
           ],
-          loader: 'babel',
-          query: {
-            modules: 'common',
-            optional: [
-              'spec.protoToAssign',
-              'es7.classProperties',
-              'es7.decorators',
-              'es7.functionBind',
-              'es7.objectRestSpread',
-              'validation.undeclaredVariableCheck'
-            ],
-            loose: [
-              'es6.classes',
-              'es6.properties.computed',
-              'es6.forOf'
-            ]
-          }
+          loader: 'babel'
         }
       ]
     },

@@ -1,9 +1,7 @@
 // jQuery is required by Bootstrap.
-import $ from 'jquery'
-window.jQuery = $
-// Has to be included with `require`, otherwise it'll be executed before we
-// assign jQuery to window.
+window.jQuery = require('jquery')
 require('bootstrap-sass')
 
 // Activate our components.
+import './data'
 import './chat'

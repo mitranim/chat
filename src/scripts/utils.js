@@ -1,14 +1,9 @@
 import React from 'react'
 import {render} from 'react-dom'
 import _ from 'lodash'
-import {autorun, stop} from 'prax'
 
-if (window.developmentMode) {
-  window.React = React
-}
-
-// React class decorator that causes it to be rendered at each element that
-// matches the given CSS selector.
+// React class decorator that causes the given component to be rendered at each
+// element that matches the given CSS selector.
 export function renderTo (selector: string) {
   return (Component: typeof React.Component) => {
     onDocumentReady(() => {
@@ -29,32 +24,6 @@ function onDocumentReady (callback: () => void): void {
       document.removeEventListener('DOMContentLoaded', cb)
       callback()
     })
-  }
-}
-
-/**
- * Component method decorator for reactive updates. Usage:
- *   class X extends React.Component {
- *     @reactive
- *     updateMe () {
- *       ...
- *     }
- *   }
- */
-export function reactive (target, name, {value: reactiveFunc}) {
-  if (typeof reactiveFunc !== 'function') return
-  const {componentWillMount: pre, componentWillUnmount: post} = target
-
-  target.componentWillMount = function () {
-    if (typeof pre === 'function') pre.call(this)
-    // Bind once. Bound functions have no prototype.
-    if (this[name].prototype) this[name] = reactiveFunc.bind(this)
-    autorun(this[name])
-  }
-
-  target.componentWillUnmount = function () {
-    stop(this[name])
-    if (typeof post === 'function') post.call(this)
   }
 }
 

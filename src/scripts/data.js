@@ -1,23 +1,29 @@
 import _ from 'lodash'
 import Firebase from 'firebase'
-import {Source} from 'prax'
-import {actions} from './actions'
+import {dispatch} from './store'
+import {signals} from './signals'
+
+/**
+ * Subscriptions
+ */
 
 export const rootRef = new Firebase('https://incandescent-torch-3438.firebaseio.com')
-
 export const chatRef = rootRef.child('chat')
 
 /**
  * Auth
  */
 
-export const auth = new Source(null)
-
 rootRef.onAuth(authData => {
   // Regard 'anonymous' as not logged in.
   if (authData && authData.provider === 'anonymous') authData = null
-  auth.ready = true
-  auth.write(transformAuthData(authData))
+  dispatch({
+    type: 'patch',
+    value: {
+      auth: transformAuthData(authData),
+      authReady: true
+    }
+  })
 })
 
 function transformAuthData (data) {
@@ -28,19 +34,19 @@ function transformAuthData (data) {
   return data
 }
 
-actions.logout.listen(() => {rootRef.unauth()})
+signals.logout.action(() => {rootRef.unauth()})
 
-actions.login.twitter.listen(() => new Promise((resolve, reject) => {
-  rootRef.authWithOAuthRedirect('twitter', (err, authData) => {
+signals.login.twitter.action(() => new Promise((resolve, reject) => {
+  rootRef.authWithOAuthRedirect('twitter', err => {
     if (err) reject(err)
-    else resolve(authData)
+    else resolve()
   })
 }))
 
-actions.login.facebook.listen(() => new Promise((resolve, reject) => {
-  rootRef.authWithOAuthRedirect('facebook', (err, authData) => {
+signals.login.facebook.action(() => new Promise((resolve, reject) => {
+  rootRef.authWithOAuthRedirect('facebook', err => {
     if (err) reject(err)
-    else resolve(authData)
+    else resolve()
   })
 }))
 
@@ -48,33 +54,47 @@ actions.login.facebook.listen(() => new Promise((resolve, reject) => {
  * Messages
  */
 
-export const messages = new Source([])
-
 chatRef.on('value', snap => {
-  messages.ready = true
-  messages.write(transformMessages(snap.val()))
+  dispatch({
+    type: 'patch',
+    value: {
+      messages: transformMessages(snap.val()),
+      messagesReady: true
+    }
+  })
 })
 
 // Sorts the received messages and enriches them with extra data.
 function transformMessages (messageMap) {
-  // Ensure that messages are ordered by timestamps.
-  return _.sortBy(_.map(messageMap, (message, id) => ({
+  const messages = _.map(messageMap, (message, id) => ({
     ...message,
     id,
     // Find links to images, if any.
     imageUrls: typeof message.body === 'string' ?
                message.body.match(/https?:\/\/\S+\.(?:jpg|jpeg|png|gif|bmp)/ig) : []
-  })), 'timestamp')
+  }))
+  // Ensure that messages are ordered by timestamps.
+  return _.sortBy(messages, 'timestamp')
 }
 
-actions.send.listen(message => new Promise((resolve, reject) => {
+signals.send.action(message => new Promise((resolve, reject) => {
   chatRef.push(message, err => {
     if (err) reject(err)
     else resolve()
   })
 }))
 
-actions.delete.listen(id => new Promise((resolve, reject) => {
+signals.send.action(() => ({
+  type: 'patch',
+  value: {sending: true}
+}))
+
+signals.send.done(() => ({
+  type: 'patch',
+  value: {sending: false}
+}))
+
+signals.delete.action(id => new Promise((resolve, reject) => {
   chatRef.child(id).remove(err => {
     if (err) reject(err)
     else resolve()
@@ -89,6 +109,4 @@ if (window.developmentMode) {
   window.Firebase = Firebase
   window.rootRef = rootRef
   window.chatRef = chatRef
-  window.auth = auth
-  window.messages = messages
 }

@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import {findDOMNode} from 'react-dom'
 import _ from 'lodash'
-import {actions} from './actions'
+import {signals} from './signals'
 
 export class MessageList extends React.Component {
   static propTypes = {
@@ -9,22 +9,14 @@ export class MessageList extends React.Component {
     messages: PropTypes.array
   }
 
-  // Scroll to the bottom after the first render.
+  // Scroll to bottom after first render.
   componentDidMount () {
-    window.requestAnimationFrame(() => {
-      this.scrollToBottom()
-    })
+    this.scrollToBottom()
   }
 
-  // Scroll to the bottom when messages change.
-  componentWillReceiveProps (props, state) {
-    if (props && props.messages) {
-      if (!_.isEqual(props.messages, this.props.messages)) {
-        window.requestAnimationFrame(() => {
-          this.scrollToBottom()
-        })
-      }
-    }
+  // Scroll to bottom on each data change.
+  componentDidUpdate () {
+    this.scrollToBottom()
   }
 
   render () {
@@ -48,7 +40,7 @@ export class MessageList extends React.Component {
 
             {/* For own messages, display a dismiss button */}
             {this.ownMessage(message) ?
-            <button className='flex-none close fa fa-times' onClick={() => {actions.delete(message.id)}} /> : null}
+            <button className='flex-none close fa fa-times' onClick={() => {signals.delete(message.id)}} /> : null}
           </div>
         ))}
       </div>
@@ -60,7 +52,9 @@ export class MessageList extends React.Component {
   }
 
   scrollToBottom () {
-    const list = findDOMNode(this)
-    list.scrollTop = list.scrollHeight - list.getBoundingClientRect().height
+    window.requestAnimationFrame(() => {
+      const list = findDOMNode(this)
+      if (list) list.scrollTop = list.scrollHeight - list.getBoundingClientRect().height
+    })
   }
 }

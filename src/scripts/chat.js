@@ -1,9 +1,10 @@
 import React from 'react'
 import Firebase from 'firebase'
+import {reactive} from 'prax-react'
 
-import {auth, messages} from './data'
-import {renderTo, reactive, Spinner} from './utils'
-import {actions, on} from './actions'
+import {read} from './store'
+import {renderTo, Spinner} from './utils'
+import {signals, done, error} from './signals'
 import {MessageList} from './message-list'
 
 @renderTo('[data-render-chat]')
@@ -13,13 +14,16 @@ export class Chat extends React.Component {
   @reactive
   update () {
     this.setState({
-      auth: auth.read(),
-      messages: messages.read()
+      auth: read('auth'),
+      authReady: read('authReady'),
+      messages: read('messages'),
+      messagesReady: read('messagesReady'),
+      sending: read('sending')
     })
   }
 
   render () {
-    if (!auth.ready || !messages.ready) {
+    if (!this.state.authReady || !this.state.messagesReady) {
       return <Spinner style={{fontSize: '3em', lineHeight: '3em'}} />
     }
 
@@ -50,21 +54,21 @@ export class Chat extends React.Component {
         {this.state.auth ?
         <form className='input-group' onSubmit={::this.send}>
           <input autoFocus type='text' className='form-control' placeholder='type your message...'
-                 name='message' ref='input' disabled={this.state.syncing} />
+                 name='message' ref='input' disabled={this.state.sending} />
           <span className='input-group-btn'>
-            <button type='submit' className='btn btn-default' disabled={this.state.syncing}>Send</button>
+            <button type='submit' className='btn btn-default' disabled={this.state.sending}>Send</button>
           </span>
         </form> : null}
 
         {/* Auth status or buttons */}
         <div className='help-block'>
           {this.state.auth ?
-          <p>Authed as {this.state.auth.fullName}. <a onClick={actions.logout} className='pointer'>Logout.</a></p> :
+          <p>Authed as {this.state.auth.fullName}. <a onClick={() => {signals.logout()}} className='pointer'>Logout.</a></p> :
           <p>
             <span>Log in to post: </span>
-            <a className='fa fa-twitter pointer' onClick={actions.login.twitter} />
+            <a className='fa fa-twitter pointer' onClick={() => {signals.login.twitter()}} />
             <span> </span>
-            <a className='fa fa-facebook pointer' onClick={actions.login.facebook} />
+            <a className='fa fa-facebook pointer' onClick={() => {signals.login.facebook()}} />
           </p>}
         </div>
       </div>
@@ -77,9 +81,7 @@ export class Chat extends React.Component {
     const body = this.refs.input.value
     if (!body) return
 
-    this.setState({syncing: true})
-
-    actions.send({
+    signals.send({
       userId: this.state.auth.uid,
       authorName: this.state.auth.fullName,
       body,
@@ -87,22 +89,15 @@ export class Chat extends React.Component {
     })
   }
 
-  @on.send.success
-  onSendSuccess () {
-    this.setState({syncing: false})
-    const {input} = this.refs
-    input.value = ''
-    input.focus()
+  @done.send
+  onSendDone () {
+    this.refs.input.value = ''
+    this.refs.input.focus()
   }
 
-  @on.send.error
-  onSendError () {
-    this.setState({syncing: false})
-  }
-
-  @on.send.error
-  @on.login.twitter.error
-  @on.login.facebook.error
+  @error.send
+  @error.login.twitter
+  @error.login.facebook
   onError (err) {
     console.error(err)
     // Firebase returns Error instances; we need to extract the message to
