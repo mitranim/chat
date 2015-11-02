@@ -106,9 +106,10 @@ signals.send.subscribe(() => ({
   value: {sending: true}
 }))
 
-signals.send.done(() => {
-  signals.patch({value: {sending: false}})
-})
+signals.send.done(() => ({
+  type: 'patch',
+  value: {sending: false}
+}))
 
 signals.delete.subscribe(id => new Promise((resolve, reject) => {
   chatRef.child(id).remove(err => {
