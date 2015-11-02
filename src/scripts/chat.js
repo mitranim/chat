@@ -9,8 +9,6 @@ import {MessageList} from './message-list'
 
 @renderTo('[data-render-chat]')
 export class Chat extends React.Component {
-  state = {}
-
   @reactive
   update () {
     this.setState({

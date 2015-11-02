@@ -51,16 +51,16 @@ function transformAuthData (data) {
   return data
 }
 
-signals.logout.action(() => {rootRef.unauth()})
+signals.logout.subscribe(() => {rootRef.unauth()})
 
-signals.login.twitter.action(() => new Promise((resolve, reject) => {
+signals.login.twitter.subscribe(() => new Promise((resolve, reject) => {
   rootRef.authWithOAuthRedirect('twitter', err => {
     if (err) reject(err)
     else resolve()
   })
 }))
 
-signals.login.facebook.action(() => new Promise((resolve, reject) => {
+signals.login.facebook.subscribe(() => new Promise((resolve, reject) => {
   rootRef.authWithOAuthRedirect('facebook', err => {
     if (err) reject(err)
     else resolve()
@@ -94,24 +94,23 @@ function transformMessages (messageMap) {
   return _.sortBy(messages, 'timestamp')
 }
 
-signals.send.action(message => new Promise((resolve, reject) => {
+signals.send.subscribe(message => new Promise((resolve, reject) => {
   chatRef.push(message, err => {
     if (err) reject(err)
     else resolve()
   })
 }))
 
-signals.send.action(() => ({
+signals.send.subscribe(() => ({
   type: 'patch',
   value: {sending: true}
 }))
 
-signals.send.done(() => ({
-  type: 'patch',
-  value: {sending: false}
-}))
+signals.send.done(() => {
+  signals.patch({value: {sending: false}})
+})
 
-signals.delete.action(id => new Promise((resolve, reject) => {
+signals.delete.subscribe(id => new Promise((resolve, reject) => {
   chatRef.child(id).remove(err => {
     if (err) reject(err)
     else resolve()
@@ -121,9 +120,6 @@ signals.delete.action(id => new Promise((resolve, reject) => {
 /**
  * Decorators
  */
-
-export const action = createDecorator('action')
-registerDecorators(action, signals, {decorator: action})
 
 export const error = createDecorator('error')
 registerDecorators(error, signals, {decorator: error})

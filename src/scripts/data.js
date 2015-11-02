@@ -7,7 +7,7 @@ import {Source} from 'prax-react'
  * Store
  */
 
-// Central data store. This is the only place where state can be mutated.
+// Central data store. This is the only place where the state can be changed.
 const store = createStore((state, action) => {
   switch (action.type) {
     case 'set': {
@@ -56,7 +56,7 @@ class Reader {
 
 // Reactive data source that reads data from the central store at the given
 // path. Example usage:
-// const value = read('one', 2, 'three')
+//   const value = read('one', 2, 'three')
 export function read (...path) {
   const pt = path.join('.')
   return (readers[pt] || (readers[pt] = new Reader(path, store))).read()

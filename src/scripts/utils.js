@@ -29,7 +29,7 @@ function onDocumentReady (callback: () => void): void {
 
 // Loading indicator.
 export const Spinner = props => {
-  let {className = 'text-center', ...other} = props
+  const {className = 'text-center', ...other} = props
 
   return (
     <div className={className} {...other}>
