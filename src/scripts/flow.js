@@ -9,11 +9,11 @@ export * from './store'
  */
 
 export const signals = createSignals(dispatch, {  // eslint-disable-line
-  set (config, out) {
-    out({type: 'set', ...config})
+  set (action, out) {
+    out({type: 'set', ...action})
   },
-  patch (config, out) {
-    out({type: 'patch', ...config})
+  patch (action, out) {
+    out({type: 'patch', ...action})
   },
   send: {success: {}},
   delete: {},
