@@ -1,6 +1,9 @@
+import _ from 'lodash'
 import React from 'react'
 import {render} from 'react-dom'
-import _ from 'lodash'
+import {createPure} from 'symphony'
+
+export const pure = createPure(React.Component)
 
 // React class decorator that causes the given component to be rendered at each
 // element that matches the given CSS selector.
