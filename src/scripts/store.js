@@ -1,5 +1,7 @@
+import Firebase from 'firebase'
 import {createStore} from 'redux'
 import {immute, replaceAtPath, mergeAtRoot, createReader} from 'symphony'
+import {createEmitter} from './utils'
 
 /**
  * Store
@@ -10,15 +12,13 @@ import {immute, replaceAtPath, mergeAtRoot, createReader} from 'symphony'
 // preserving as many original references as possible, which enables very
 // precise view updates (encapsulated in symphony's createReader and other
 // reactive utilities).
-const store = createStore((state, action) => {
-  switch (action.type) {
+const store = createStore((state, {type, value, path}) => {
+  switch (type) {
     case 'set': {
-      state = replaceAtPath(state, action.value, action.path)
-      break
+      return replaceAtPath(state, value, path)
     }
     case 'patch': {
-      state = mergeAtRoot(state, action.value)
-      break
+      return mergeAtRoot(state, value)
     }
   }
   return state
@@ -33,14 +33,26 @@ const store = createStore((state, action) => {
   error: null
 }))
 
-export const dispatch = store.dispatch
+export const storeDispatch = store.dispatch
 export const read = createReader(store)
+
+/**
+ * Connection
+ */
+
+export const rootRef = new Firebase('https://incandescent-torch-3438.firebaseio.com')
 
 /**
  * Utils
  */
 
+// Application-wide event emitter.
+export const emit = createEmitter('sendSuccess', 'sendDone')
+export const on = emit.decorator
+
 if (window.developmentMode) {
   window.store = store
   window.read = read
+  window.emit = emit
+  window.on = on
 }

@@ -2,7 +2,8 @@ import React from 'react'
 import Firebase from 'firebase'
 import {reactiveRender} from 'symphony'
 import {renderTo, Spinner} from './utils'
-import {read, signals, on, done} from './flow'
+import {read, on} from './store'
+import {dispatch} from './dispatch'
 import {MessageList} from './message-list'
 
 @renderTo('[data-render-chat]')
@@ -54,12 +55,12 @@ export class Chat extends React.Component {
         {/* Auth status or buttons */}
         <div className='help-block'>
           {auth ?
-          <p>Authed as {auth.fullName}. <a onClick={signals.logout} className='pointer'>Logout.</a></p> :
+          <p>Authed as {auth.fullName}. <a onClick={() => {dispatch({type: 'logout'})}} className='pointer'>Logout.</a></p> :
           <p>
             <span>Log in to post: </span>
-            <a className='fa fa-twitter pointer' onClick={signals.login.twitter} />
+            <a className='fa fa-twitter pointer' onClick={() => {dispatch({type: 'loginTwitter'})}} />
             <span> </span>
-            <a className='fa fa-facebook pointer' onClick={signals.login.facebook} />
+            <a className='fa fa-facebook pointer' onClick={() => {dispatch({type: 'loginFacebook'})}} />
           </p>}
         </div>
       </div>
@@ -74,21 +75,24 @@ export class Chat extends React.Component {
     const auth = read('auth')
     if (!auth) return
 
-    signals.send({
-      userId: auth.uid,
-      authorName: auth.fullName,
-      body,
-      timestamp: Firebase.ServerValue.TIMESTAMP
+    dispatch({
+      type: 'sendSequence',
+      value: {
+        userId: auth.uid,
+        authorName: auth.fullName,
+        body,
+        timestamp: Firebase.ServerValue.TIMESTAMP
+      }
     })
   }
 
-  @on.send.success
+  @on('sendSuccess')
   onSendSuccess () {
     this.refs.input.value = ''
   }
 
-  @done.send
+  @on('sendDone')
   onSendDone () {
-    this.refs.input.focus()
+    setTimeout(() => {this.refs.input.focus()})
   }
 }

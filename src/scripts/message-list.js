@@ -2,7 +2,8 @@ import _ from 'lodash'
 import React, {PropTypes} from 'react'
 import {findDOMNode} from 'react-dom'
 import {pure} from './utils'
-import {read, signals} from './flow'
+import {read} from './store'
+import {dispatch} from './dispatch'
 
 const Message = pure(props => {
   const message = read('messages', props.id)
@@ -25,7 +26,8 @@ const Message = pure(props => {
 
       {/* For own messages, display a dismiss button */}
       {ownMessage(message) ?
-      <button className='flex-none close fa fa-times' onClick={() => {signals.delete(message.id)}} /> : null}
+      <button className='flex-none close fa fa-times'
+              onClick={() => {dispatch({type: 'delete', value: message.id})}} /> : null}
     </div>
   )
 })
