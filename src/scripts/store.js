@@ -29,7 +29,8 @@ const store = create((state, {type, value, path}) => {
     }
   }
   return state
-}, immute({
+},
+immute({
   auth: null,
   messages: {},
   messageIds: [],

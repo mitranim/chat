@@ -6,21 +6,21 @@ export function transducer (action, dispatch) {
   switch (type) {
     case 'logout': {
       rootRef.unauth()
-      return
+      break
     }
 
     case 'loginTwitter': {
       rootRef.authWithOAuthRedirect('twitter', err => {
         if (err) dispatch({type: 'patch', value: {error: parseError(err)}})
       })
-      return
+      break
     }
 
     case 'loginFacebook': {
       rootRef.authWithOAuthRedirect('facebook', err => {
         if (err) dispatch({type: 'patch', value: {error: parseError(err)}})
       })
-      return
+      break
     }
 
     case 'init': {
