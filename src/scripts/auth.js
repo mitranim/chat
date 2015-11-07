@@ -1,7 +1,6 @@
-import {storeDispatch, rootRef} from './store'
-import {parseError} from './utils'
+import {rootRef, parseError} from './utils'
 
-export function transducer (action) {
+export function transducer (action, dispatch) {
   const {type} = action
 
   switch (type) {
@@ -9,35 +8,40 @@ export function transducer (action) {
       rootRef.unauth()
       return
     }
+
     case 'loginTwitter': {
       rootRef.authWithOAuthRedirect('twitter', err => {
-        if (err) storeDispatch({type: 'patch', value: {error: parseError(err)}})
+        if (err) dispatch({type: 'patch', value: {error: parseError(err)}})
       })
       return
     }
+
     case 'loginFacebook': {
       rootRef.authWithOAuthRedirect('facebook', err => {
-        if (err) storeDispatch({type: 'patch', value: {error: parseError(err)}})
+        if (err) dispatch({type: 'patch', value: {error: parseError(err)}})
       })
       return
+    }
+
+    case 'init': {
+      rootRef.onAuth(authData => {
+        // Regard 'anonymous' as not logged in.
+        if (authData && authData.provider === 'anonymous') authData = null
+
+        dispatch({
+          type: 'patch',
+          value: {
+            auth: transformAuthData(authData),
+            authReady: true
+          }
+        })
+      })
+      break
     }
   }
 
   return action
 }
-
-rootRef.onAuth(authData => {
-  // Regard 'anonymous' as not logged in.
-  if (authData && authData.provider === 'anonymous') authData = null
-
-  storeDispatch({
-    type: 'patch',
-    value: {
-      auth: transformAuthData(authData),
-      authReady: true
-    }
-  })
-})
 
 function transformAuthData (data) {
   if (data) {

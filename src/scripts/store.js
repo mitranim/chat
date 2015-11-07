@@ -1,7 +1,14 @@
-import Firebase from 'firebase'
-import {createStore} from 'redux'
-import {immute, replaceAtPath, mergeAtRoot, createReader} from 'symphony'
-import {createEmitter} from './utils'
+import {createStore, applyMiddleware} from 'redux'
+import {createMiddleware, immute, replaceAtPath, mergeAtRoot, createReader} from 'symphony'
+
+/**
+ * Transducing middleware
+ */
+
+import {transducer as auth} from './auth'
+import {transducer as im} from './im'
+
+const create = applyMiddleware(createMiddleware(auth, im))(createStore)
 
 /**
  * Store
@@ -12,7 +19,7 @@ import {createEmitter} from './utils'
 // preserving as many original references as possible, which enables very
 // precise view updates (encapsulated in symphony's createReader and other
 // reactive utilities).
-const store = createStore((state, {type, value, path}) => {
+const store = create((state, {type, value, path}) => {
   switch (type) {
     case 'set': {
       return replaceAtPath(state, value, path)
@@ -33,26 +40,16 @@ const store = createStore((state, {type, value, path}) => {
   error: null
 }))
 
-export const storeDispatch = store.dispatch
+store.dispatch({type: 'init'})
+
+export const dispatch = store.dispatch
 export const read = createReader(store)
-
-/**
- * Connection
- */
-
-export const rootRef = new Firebase('https://incandescent-torch-3438.firebaseio.com')
 
 /**
  * Utils
  */
 
-// Application-wide event emitter.
-export const emit = createEmitter('sendSuccess', 'sendDone')
-export const on = emit.decorator
-
 if (window.developmentMode) {
   window.store = store
   window.read = read
-  window.emit = emit
-  window.on = on
 }

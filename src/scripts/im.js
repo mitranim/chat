@@ -1,22 +1,21 @@
 import _ from 'lodash'
-import {storeDispatch, emit, rootRef} from './store'
-import {parseError} from './utils'
+import {rootRef, emit, parseError} from './utils'
 
 const chatRef = rootRef.child('chat')
 
-export function transducer (action) {
+export function transducer (action, dispatch) {
   const {type, value} = action
 
   switch (type) {
-    case 'sendSequence': {
+    case 'send': {
       return [
         {type: 'patch', value: {sending: true}},
-        {type: 'send', value},
+        {type: '_send', value},
         {type: 'patch', value: {sending: false}}
       ]
     }
 
-    case 'send': {
+    case '_send': {
       return new Promise(resolve => {
         chatRef.push(value, err => {
           if (err) {
@@ -41,29 +40,28 @@ export function transducer (action) {
         })
       })
     }
+
+    case 'init': {
+      chatRef.on('value', snap => {
+        const messages = transformMessages(snap.val())
+        // Sorted by timestamps.
+        const messageIds = _.map(_.sortBy(messages, 'timestamp'), 'id')
+
+        dispatch({
+          type: 'patch',
+          value: {
+            messages,
+            messageIds,
+            messagesReady: true
+          }
+        })
+      })
+      break
+    }
   }
 
   return action
 }
-
-/**
- * Loading
- */
-
-chatRef.on('value', snap => {
-  const messages = transformMessages(snap.val())
-  // Sorted by timestamps.
-  const messageIds = _.map(_.sortBy(messages, 'timestamp'), 'id')
-
-  storeDispatch({
-    type: 'patch',
-    value: {
-      messages,
-      messageIds,
-      messagesReady: true
-    }
-  })
-})
 
 /**
  * Utils

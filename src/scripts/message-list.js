@@ -2,8 +2,7 @@ import _ from 'lodash'
 import React, {PropTypes} from 'react'
 import {findDOMNode} from 'react-dom'
 import {pure} from './utils'
-import {read} from './store'
-import {dispatch} from './dispatch'
+import {read, dispatch} from './store'
 
 const Message = pure(props => {
   const message = read('messages', props.id)

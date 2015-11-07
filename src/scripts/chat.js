@@ -1,9 +1,8 @@
 import React from 'react'
 import Firebase from 'firebase'
 import {reactiveRender} from 'symphony'
-import {renderTo, Spinner} from './utils'
-import {read, on} from './store'
-import {dispatch} from './dispatch'
+import {renderTo, Spinner, on} from './utils'
+import {read, dispatch} from './store'
 import {MessageList} from './message-list'
 
 @renderTo('[data-render-chat]')
@@ -76,7 +75,7 @@ export class Chat extends React.Component {
     if (!auth) return
 
     dispatch({
-      type: 'sendSequence',
+      type: 'send',
       value: {
         userId: auth.uid,
         authorName: auth.fullName,
