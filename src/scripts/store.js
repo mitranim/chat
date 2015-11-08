@@ -43,7 +43,14 @@ immute({
 
 store.dispatch({type: 'init'})
 
+// Redux dispatch (sync) with our transducing middleware for serial and async actions.
 export const dispatch = store.dispatch
+
+// Reactive data source that reads the application state at the given path. View
+// components are automatically updated when the data they have tried to access
+// in the past (such as during the first render) is changed. The updates are
+// extremely precise, thanks to the reference equality guarantee provided by
+// symphony's immutable merge functions.
 export const read = createReader(store)
 
 /**

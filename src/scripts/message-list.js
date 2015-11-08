@@ -4,6 +4,9 @@ import {findDOMNode} from 'react-dom'
 import {pure} from './utils'
 import {read, dispatch} from './store'
 
+// The component is automatically updated when the message it accesses through
+// the `read` function is changed. (For that to happen, the message would have
+// to be edited.) It's never updated willy-nilly.
 const Message = pure(props => {
   const message = read('messages', props.id)
   if (!message) return null

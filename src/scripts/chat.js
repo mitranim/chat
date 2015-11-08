@@ -8,6 +8,8 @@ import {MessageList} from './message-list'
 @renderTo('[data-render-chat]')
 @reactiveRender
 export class Chat extends React.Component {
+  // The component is automatically updated when, and only when, the data on any
+  // of the paths it accesses through the `read` function is changed.
   render () {
     const auth = read('auth')
     const authReady = read('authReady')
