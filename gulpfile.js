@@ -42,10 +42,7 @@ function reload (done) {
 /* -------------------------------- Scripts ---------------------------------*/
 
 function scripts (done) {
-  const alias = {
-    'prax-react': pt.join(process.cwd(), 'node_modules/prax/lib/prax-react'),
-    'rapt-react': pt.join(process.cwd(), 'node_modules/rapt/lib/rapt-react')
-  }
+  const alias = {}
   if (flags.prod) {
     alias['react'] = 'react/dist/react.min'
     alias['react-dom'] = 'react-dom/dist/react-dom.min'
@@ -57,9 +54,7 @@ function scripts (done) {
       path: pt.join(process.cwd(), dest.scripts),
       filename: 'app.js'
     },
-    resolve: {
-      alias: alias
-    },
+    resolve: {alias},
     module: {
       loaders: [
         {

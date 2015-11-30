@@ -1,20 +1,20 @@
 import _ from 'lodash'
 import React, {PropTypes} from 'react'
 import {findDOMNode} from 'react-dom'
-import {pure} from './utils'
-import {read, dispatch} from './store'
+import {read, send, auto} from './core'
 
 // The component is automatically updated when the message it accesses through
 // the `read` function is changed. (For that to happen, the message would have
 // to be edited.) It's never updated willy-nilly.
-const Message = pure(props => {
+const Message = auto(props => {
   const message = read('messages', props.id)
   if (!message) return null
 
   return (
     <div className={
           `list-group-item row-between-center
-           ${ownMessage(message) ? 'list-group-item-success' : 'list-group-item-info'}`}>
+           ${ownMessage(message) ? 'list-group-item-success' : 'list-group-item-info'}`
+         }>
       <div className='flex-1 typographic-container'>
         <p>
           <strong>{message.authorName}</strong>
@@ -29,7 +29,7 @@ const Message = pure(props => {
       {/* For own messages, display a dismiss button */}
       {ownMessage(message) ?
       <button className='flex-none close fa fa-times'
-              onClick={() => {dispatch({type: 'delete', value: message.id})}} /> : null}
+              onClick={() => {send({type: 'delete', id: message.id})}} /> : null}
     </div>
   )
 })
