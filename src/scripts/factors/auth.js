@@ -19,7 +19,7 @@ export default (read, send) => pipe(
     })
   }),
 
-  match({type: 'logout'}, rootRef.unauth),
+  match({type: 'logout'}, () => {rootRef.unauth()}),
 
   match({type: 'login', provider: Boolean}, ({provider}) => {
     rootRef.authWithOAuthRedirect(provider, err => {
