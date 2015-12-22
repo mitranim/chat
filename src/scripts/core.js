@@ -1,6 +1,6 @@
 import {Component} from 'react'
 // Core utilities.
-import {createAtom, createFq} from 'prax'
+import {createAtom, createMb} from 'prax'
 // Immutability utilities.
 import {immute, replaceAtPath, mergeAtPath} from 'prax'
 
@@ -10,55 +10,49 @@ import {immute, replaceAtPath, mergeAtPath} from 'prax'
 
 // Contains the entire application state. The data is immutable, and can only be
 // changed in the core writer, based on the messages received through the
-// message bus (factor queue). Has support for efficient change detection, which
-// we exploit to update our views.
+// message bus. Performs efficient change detection for precise view updates.
 //
-// The initial state is optional. Subsequent update create a new immutable tree
-// every time, preserving as many previous references as possible.
+// We pass the optional initial state. Subsequent update create a new immutable
+// tree every time, preserving as many previous references as possible.
 export const atom = createAtom(immute({
   auth: null,
   messages: {},
   messageIds: [],
 
+  chat: {
+    sending: false,
+    error: null,
+    text: ''
+  },
+
   authReady: false,
-  messagesReady: false,
-  sending: false,
-  error: null
+  messagesReady: false
 }))
 
 export const {read, watch, stop} = atom
 
 /**
- * FQ
+ * Message Bus
  */
 
-import auth from './factors/auth'
-import im from './factors/im'
+const mb = createMb(
+  {type: 'set', path: x => x instanceof Array}, ({value, path}) => {
+    atom.write(replaceAtPath(read(), value, path))
+  },
 
-const writer = read => next => msg => {
-  if (msg === 'init') return
-  const {type, value, path} = msg
-
-  switch (type) {
-    case 'set':
-      next(replaceAtPath(read(), value, path))
-      break
-    case 'patch':
-      next(mergeAtPath(read(), value, path || []))
-      break
-    default:
-      console.warn('Discarding unrecognised message:', msg)
+  {type: 'patch'}, ({value, path}) => {
+    atom.write(mergeAtPath(read(), value, path || []))
   }
-}
+)
 
-// Lazy generator of the factor queue. Can be imported and connected to mock
-// input and output for testing in isolation.
-export const fq = createFq(auth, im, writer)
+// Input and connection to the message bus. All "commands" in the application
+// are sent through `send` to the factos that have connected to the bus with
+// `match`.
+export const {send, match} = mb
 
-// Input to the factor queue. All "commands" in the application are sent through
-// it to the factors. Messages that eventually arrive to the writer have a
-// chance to change the atom.
-export const send = fq(atom.read, atom.write)
+// Application logic.
+require('./factors/auth')
+require('./factors/chat')
 
 send('init')
 
@@ -66,10 +60,14 @@ send('init')
  * Rendering
  */
 
-import {createAuto} from 'prax/react'
+import {createAuto, createReactiveRender} from 'prax/react'
 
-// Creates a React component out of a pure function. The component will
-// automatically and efficiently track atom updates and re-render when needed.
+// Decorates a React component to become truly reactive. It will precisely track
+// the atom data accessed in its `render` method and re-render when it changes.
+export const reactiveRender = createReactiveRender(atom)
+
+// Special case of `reactiveRender` that creates a component out of a function.
+// Useful for components that only have the `render` method.
 export const auto = createAuto(Component, atom)
 
 /**
@@ -78,5 +76,5 @@ export const auto = createAuto(Component, atom)
 
 if (window.developmentMode) {
   window.atom = atom
-  window.send = send
+  window.mb = mb
 }

@@ -1,6 +1,6 @@
 import React from 'react'
-import {renderTo, Spinner} from './utils'
-import {read, send, auto} from './core'
+import {renderTo, Spinner} from '../utils'
+import {read, send, auto} from '../core'
 import {MessageList} from './message-list'
 
 renderTo('[data-render-chat]')(auto(props => {
@@ -8,8 +8,7 @@ renderTo('[data-render-chat]')(auto(props => {
   const authReady = read('authReady')
   const messageIds = read('messageIds')
   const messagesReady = read('messagesReady')
-  const sending = read('sending')
-  const error = read('error')
+  const {text, error, sending} = read('chat')
 
   if (!authReady || !messagesReady) {
     return <Spinner style={{fontSize: '3em', lineHeight: '3em'}} />
@@ -27,7 +26,7 @@ renderTo('[data-render-chat]')(auto(props => {
       <p>There are no messages yet. Be the first!</p>}
 
       {messageIds.length ?
-      <MessageList messageIds={messageIds} /> : null}
+      <MessageList /> : null}
 
       {/* Error messages go here */}
       {error ?
@@ -40,7 +39,7 @@ renderTo('[data-render-chat]')(auto(props => {
       {auth ?
       <form className='input-group' onSubmit={sendMessage}>
         <input autoFocus type='text' className='form-control' placeholder='type your message...'
-               id='messageInput' disabled={sending} />
+               value={text} onChange={onChange} />
         <span className='input-group-btn'>
           <button type='submit' className='btn btn-default' disabled={sending}>Send</button>
         </span>
@@ -65,7 +64,11 @@ function login (provider) {
   send({type: 'login', provider})
 }
 
+function onChange ({target: {value}}) {
+  send({type: 'set', path: ['chat', 'text'], value})
+}
+
 function sendMessage (event) {
   event.preventDefault()
-  send('send')
+  send('chat/send')
 }
