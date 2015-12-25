@@ -1,56 +1,49 @@
 import {Component} from 'react'
 // Core utilities.
 import {createAtom, createMb} from 'prax'
-// Immutability utilities.
-import {immute, replaceAtPath, mergeAtPath} from 'prax'
+// Extras.
+import {asyncStrategy} from 'prax/async'
 
 /**
  * State
  */
 
-// Contains the entire application state. The data is immutable, and can only be
-// changed in the core writer, based on the messages received through the
-// message bus. Performs efficient change detection for precise view updates.
+// Contains the entire application state. The data is immutable and can only be
+// updated through atom methods. Performs efficient change detection for precise
+// view updates.
 //
 // We pass the optional initial state. Subsequent update create a new immutable
 // tree every time, preserving as many previous references as possible.
-export const atom = createAtom(immute({
+const atom = createAtom({
   auth: null,
   messages: {},
   messageIds: [],
 
   chat: {
     sending: false,
-    error: null,
+    error: '',
     text: ''
   },
 
   authReady: false,
   messagesReady: false
-}))
+}, asyncStrategy)
 
-export const {read, watch, stop} = atom
+export const {read, set, patch} = atom
 
 /**
  * Message Bus
  */
 
-const mb = createMb(
-  {type: 'set', path: x => x instanceof Array}, ({value, path}) => {
-    atom.write(replaceAtPath(read(), value, path))
-  },
+// Event system with fancy pattern matching.
+const mb = createMb()
 
-  {type: 'patch'}, ({value, path}) => {
-    atom.write(mergeAtPath(read(), value, path || []))
-  }
-)
-
-// Input and connection to the message bus. All "commands" in the application
-// are sent through `send` to the factos that have connected to the bus with
-// `match`.
 export const {send, match} = mb
 
-// Application logic.
+/**
+ * App Logic
+ */
+
 require('./factors/auth')
 require('./factors/chat')
 

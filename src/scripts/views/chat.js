@@ -1,9 +1,9 @@
 import React from 'react'
 import {renderTo, Spinner} from '../utils'
-import {read, send, auto} from '../core'
+import {set, send, auto} from '../core'
 import {MessageList} from './message-list'
 
-renderTo('[data-render-chat]')(auto(props => {
+renderTo('[data-render-chat]')(auto((props, read) => {
   const auth = read('auth')
   const authReady = read('authReady')
   const messageIds = read('messageIds')
@@ -31,14 +31,15 @@ renderTo('[data-render-chat]')(auto(props => {
       {/* Error messages go here */}
       {error ?
       <div className='alert alert-warning'>
-        <button type='button' className='close fa fa-times' data-dismiss='alert' />
+        <button type='button' className='close fa fa-times' onClick={dismissError} />
         {error}
       </div> : null}
 
       {/* If authed, display the post form */}
       {auth ?
       <form className='input-group' onSubmit={sendMessage}>
-        <input autoFocus type='text' className='form-control' placeholder='type your message...'
+        <input autoFocus type='text' className='form-control'
+               placeholder='type your message...' readOnly={sending}
                value={text} onChange={onChange} />
         <span className='input-group-btn'>
           <button type='submit' className='btn btn-default' disabled={sending}>Send</button>
@@ -48,7 +49,7 @@ renderTo('[data-render-chat]')(auto(props => {
       {/* Auth status or buttons */}
       <div className='help-block'>
         {auth ?
-        <p>Authed as {auth.fullName}. <a onClick={() => {send({type: 'logout'})}} className='pointer'>Logout.</a></p> :
+        <p>Authed as {auth.fullName}. <a onClick={() => {send('logout')}} className='pointer'>Logout.</a></p> :
         <p>
           <span>Log in to post: </span>
           <a className='fa fa-twitter pointer' onClick={() => {login('twitter')}} />
@@ -65,10 +66,14 @@ function login (provider) {
 }
 
 function onChange ({target: {value}}) {
-  send({type: 'set', path: ['chat', 'text'], value})
+  set(['chat', 'text'], value)
 }
 
 function sendMessage (event) {
   event.preventDefault()
   send('chat/send')
+}
+
+function dismissError () {
+  set(['chat', 'error'], '')
 }

@@ -1,18 +1,19 @@
 import _ from 'lodash'
 import React, {PropTypes} from 'react'
 import {findDOMNode} from 'react-dom'
-import {read, send, auto, reactiveRender} from '../core'
+import {send, auto, reactiveRender} from '../core'
 
 // The component is automatically updated when the message it accesses through
 // the `read` function is changed. (For that to happen, the message would have
 // to be edited.) It's never updated willy-nilly.
-const Message = auto(props => {
+const Message = auto((props, read) => {
   const message = read('messages', props.id)
   if (!message) return null
+  const own = message.userId && message.userId === read('auth', 'uid')
 
   return (
     <div className={`list-group-item row-between-center
-                    ${ownMessage(message) ? 'list-group-item-success' : 'list-group-item-info'}`}>
+                    ${own ? 'list-group-item-success' : 'list-group-item-info'}`}>
       <div className='flex-1 typographic-container'>
         <p>
           <strong>{message.authorName}</strong>
@@ -25,7 +26,7 @@ const Message = auto(props => {
       </div>
 
       {/* For own messages, display a dismiss button */}
-      {ownMessage(message) ?
+      {own ?
       <button className='flex-none close fa fa-times'
               onClick={() => {send({type: 'chat/delete', id: message.id})}} /> : null}
     </div>
@@ -49,7 +50,7 @@ export class MessageList extends React.Component {
     this.scrollToBottom()
   }
 
-  render () {
+  render (read) {
     const messageIds = read('messageIds')
     return (
       <div className='list-group messages-list'>
@@ -66,9 +67,4 @@ export class MessageList extends React.Component {
       if (list) list.scrollTop = list.scrollHeight - list.getBoundingClientRect().height
     })
   }
-}
-
-function ownMessage (message) {
-  const auth = read('auth')
-  return !!auth && !!message.userId && (message.userId === auth.uid)
 }
