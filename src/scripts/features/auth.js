@@ -15,6 +15,7 @@ export class Auth extends Agent {
     this.env = env
     this.providers = {
       twitter: new Firebase.auth.TwitterAuthProvider(),
+      facebook: new Firebase.auth.FacebookAuthProvider(),
     }
   }
 

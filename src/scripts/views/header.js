@@ -1,7 +1,7 @@
-import {PraxComponent} from 'prax'
-// import {NavLink} from './link'
-import {LoginButtons, LogoutButton} from './auth'
-import {LoadingIndicator} from './loading-indicator'
+const {PraxComponent} = require('prax')
+// const {NavLink} = require('./link')
+const {LoginButtons, LogoutButton} = require('./auth')
+const {LoadingIndicator} = require('./loading-indicator')
 
 export class Header extends PraxComponent {
   subrender ({deref}) {

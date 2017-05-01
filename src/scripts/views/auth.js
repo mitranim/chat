@@ -12,6 +12,14 @@ export class LoginButtons extends PraxComponent {
           }}>
           <span className='fa fa-twitter' />
         </button>
+        <button
+          className='cursor-pointer padding-1 aria-label-position-left'
+          aria-label='Login with Facebook'
+          onClick={() => {
+            this.env.deref().auth.login('facebook')
+          }}>
+          <span className='fa fa-facebook' />
+        </button>
       </span>
     )
   }
