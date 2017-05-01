@@ -25,7 +25,7 @@ export class Dom extends Agent {
     }
 
     cleanup.push(seq(
-      addEvent(window, 'keydown', pipeAnd(eventKeyName, keyEvent, env.send)),
+      addEvent(window, 'keydown', pipeAnd(eventKeyName, keyEvent, env.mq.send)),
 
       addEvent(window, 'keydown', seq(
         bind(removeClass, 'last-input-mouse', document.body),

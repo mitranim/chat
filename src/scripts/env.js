@@ -1,4 +1,4 @@
-const {Agent, MessageQue, bindAll, derefIn, deinit} = require('prax')
+const {Agent, MessageQue, derefIn, deinit} = require('prax')
 const {Nav} = require('./features/nav')
 const {Dom} = require('./features/dom')
 const {Auth} = require('./features/auth')
@@ -7,11 +7,6 @@ const {Participants} = require('./features/participants')
 const {MessageForm} = require('./features/message-form')
 
 export class Env extends Agent {
-  constructor () {
-    super()
-    bindAll(this)
-  }
-
   init (prevEnv) {
     this.reset({
       mq: new MessageQue(),
@@ -26,17 +21,5 @@ export class Env extends Agent {
     deinit(prevEnv)
 
     this.deref().dom.init()
-  }
-
-  send (msg) {
-    this.deref().mq.push(this, msg)
-  }
-
-  addEffect () {
-    return this.deref().mq.subscribe(...arguments)
-  }
-
-  removeEffect () {
-    return this.deref().mq.unsubscribe(...arguments)
   }
 }
