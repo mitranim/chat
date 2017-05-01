@@ -1,30 +1,8 @@
-# Numerous always-ignore extensions
-*.diff
-*.err
-*.orig
+# Commonly ignored files
 *.log
-*.rej
-*.swo
-*.swp
-*.zip
-*.vi
-*~
-
-# OS or Editor folders
 .DS_Store
-._*
-Thumbs.db
-.cache
-.project
-.settings
-.tmproj
-*.esproj
-nbproject
-*.sublime-project
-*.sublime-workspace
-.idea
 
-# Folders to ignore
+# Folders
 node_modules
-bower_components
 dist
+gh-pages

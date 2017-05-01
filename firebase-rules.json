@@ -1,0 +1,33 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    "messages": {
+      ".read": true,
+      "$messageId": {
+        ".write": "!data.exists() || auth != null && data.child('author/uid').val() === auth.uid",
+        ".validate": "newData.hasChildren(['author', 'body', 'createdAt'])",
+        "author": {
+          ".validate": "newData.hasChildren(['uid', 'displayName'])",
+          "uid": {".validate": "auth != null && newData.val() === auth.uid"},
+          "displayName": {".validate": "newData.isString() && newData.val().length > 0"}
+        },
+        "body": {".validate": "newData.isString() && newData.val().length > 0"},
+        "createdAt": {".validate": "newData.val() <= now"}
+      }
+    },
+    "participants": {
+      ".read": true,
+      ".indexOn": ["lastActiveAt"],
+      "$participantId": {
+        ".write": "!data.exists() || auth != null && data.child('user/uid').val() === auth.uid",
+        ".validate": "newData.hasChildren(['lastActiveAt', 'user'])",
+        "lastActiveAt": {".validate": "newData.val() <= now"},
+        "user": {
+          ".validate": "newData.hasChildren(['uid', 'displayName'])",
+          "uid": {".validate": "auth != null && newData.val() === auth.uid"},
+          "displayName": {".validate": "newData.isString() && newData.val().length > 0"}
+        }
+      }
+    }
+  }
+}

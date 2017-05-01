@@ -1,0 +1,22 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,400i,600,600i&subset=latin-ext);
+@import './_variables';
+
+html {
+  font-family: 'Open Sans', 'Helvetica Neue', Roboto, 'Segoe UI', Verdana, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  @media (max-width: $breakpoint-md) {font-size: 14px}
+  @media (max-width: $breakpoint-sm) {font-size: 12px}
+  line-height: 1.4;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-0x8 {font-size: 0.8rem;}
+.font-1   {font-size: 1rem;}
+.font-2   {font-size: 1.2rem;}
+.font-3   {font-size: 1.4rem;}
+.font-4   {font-size: 1.6rem;}
+.font-5   {font-size: 1.8rem;}
+.font-6   {font-size: 2rem;}

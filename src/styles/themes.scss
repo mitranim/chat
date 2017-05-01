@@ -1,0 +1,35 @@
+@import './_variables';
+@import './_mixins';
+
+.fa.fa-facebook     {color: $color-facebook}
+.fa.fa-github       {color: $color-github}
+.fa.fa-google       {color: $color-google}
+.fa.fa-google-plus  {color: $color-google-plus}
+.fa.fa-instagram    {color: $color-instagram}
+.fa.fa-linkedin     {color: $color-linkedin}
+.fa.fa-skype        {color: $color-skype}
+.fa.fa-twitter      {color: $color-twitter}
+.fa.fa-youtube-play {color: $color-youtube}
+
+// TODO cleanup
+@include color-scheme(
+  $color-black-04: $color-black-04,
+  $color-black-15: $color-black-15,
+  $color-black-30: $color-black-30,
+  $color-black-54: $color-black-54,
+  $color-black-87: $color-black-87,
+  $color-white-04: $color-white-04,
+  $color-white-15: $color-white-15,
+  $color-white-30: $color-white-30,
+  $color-white-54: $color-white-54,
+  $color-white-87: $color-white-87,
+  $color-blue: $color-blue,
+  $color-orange: $color-orange,
+  $color-white: $color-white,
+  $color-black: $color-black,
+  $color-green: $color-green,
+  $color-red: $color-red,
+  $color-placeholder-light: $color-placeholder-light,
+  $color-focus-indicator: $color-focus-indicator,
+  $color-focus-indicator-solid: $color-focus-indicator-solid
+);

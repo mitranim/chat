@@ -1,99 +1,89 @@
-html {
-  font-weight: $font-weight;
+// h1, h2, h3, h4, h5, h6 {
+//   line-height: 1.2;
+// }
+
+// a {
+//   color: $color-link;
+//   &:hover {
+//     color: darken($color-link, 20%);
+//   }
+// }
+
+%bg {
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
-.chat-container {
-  // Layout.
-  height: 100vh;
-  width: 100%;
-  @media (min-width: $screen-md-min) {
-    width: 80%;
+.bg-cover {
+  @extend %bg;
+  background-size: cover;
+}
+
+.square-2em {
+  width: 2em;
+  height: 2em;
+}
+
+.overlay {
+  @extend .fix-fit;
+  z-index: $z-index-overlay;
+}
+
+.shadow-drop {
+  box-shadow: 0 1px 3px 1px $color-black-15;
+}
+
+.shadow-drop-thick {
+  box-shadow: 1px 1px 4px 2px $color-black-15;
+}
+
+.panel-red {
+  border: 1px solid $color-red;
+  background-color: rgba($color-red, 0.05);
+}
+
+.popping-3 {
+  .popping:nth-child(2) {
+    animation-delay: 0.3s;
   }
-  @media (min-width: $screen-lg-min) {
-    width: 60%;
+  .popping:nth-child(3) {
+    animation-delay: 0.6s;
   }
-  margin-left: auto;
-  margin-right: auto;
+  .popping {
+    display: inline-block;
+    color: $color-blue;
+    animation-name: popAnimation3;
+    animation-duration: 0.9s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-out;
+  }
 
-  // Inner layout.
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-
-  // Whitespace.
-  padding: 1rem;
-
-  > * {flex: none}
-
-  // Stretch to fill the available space.
-  .messages-list {
-    flex: 1;
-    overflow-x: hidden;
-    overflow-y: scroll;
-
-    // Offset the close button.
-    button.close {
-      margin-left: 1rem;
+  @keyframes popAnimation3 {
+    0% {
+      transform: scale(1);
+    }
+    33% {
+      transform: scale(1.4);
+    }
+    50%, 100% {
+      transform: scale(1);
     }
   }
 }
 
-.message-image-embed {
-  display: inline-block;
-  width: 100%;
-  float: right;
-  clear: both;
+.children-margin-popping > :not(:first-child) {
+  margin-left: 0.3em;
 }
 
-.row-between-center {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+// Experimental
+.last-input-keyboard :focus {
+  z-index: 0;
 }
 
-.flex-1 {
-  flex: 1;
+.no-pointer-events {
+  pointer-events: none;
 }
 
-.flex-none {
-  flex: none;
-}
-
-.typographic-container {
-  > * {margin-bottom: 1rem}
-  > :last-child {margin-bottom: 0}
-}
-
-a.fa {
-  color: inherit;
-  &:hover {
-    text-decoration: none;
-  }
-}
-
-.fa-twitter {
-  @include transitions(color);
-  &:hover {
-    color: $color-twitter;
-  }
-}
-
-.fa-facebook {
-  @include transitions(color);
-  &:hover {
-    color: $color-facebook;
-  }
-}
-
-.fa-github {
-  @include transitions(color);
-  &:hover {
-    color: $color-github;
-  }
-}
-
-.pointer {
-  cursor: pointer;
+button {
+  @include transition;
 }

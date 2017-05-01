@@ -1,5 +1,392 @@
-@mixin transitions($property: all) {
-  transition-duration: 0.2s;
-  transition-timing-function: easing;
-  transition-property: $property;
+@import 'node_modules/stylebox/scss/mixins/colors';
+
+@mixin transition($prop: all, $duration: 0.2s, $function: ease-out) {
+  transition: $prop $duration $function;
+}
+
+@mixin tooltip($z-index, $color-bg, $color-fg, $color-bg-warn, $border-radius: 3px) {
+  [aria-label] {
+    position: relative;
+
+    &::before,
+    &::after {
+      display: none;
+      position: absolute;
+      z-index: $z-index;
+      pointer-events: none;
+      outline: none;
+      padding: 0;
+      // Negate inherited
+      text-transform: none;
+    }
+
+    &:hover {
+      &::before,
+      &::after {
+        display: block;
+      }
+    }
+
+    &::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border: 0.6rem solid transparent;
+    }
+
+    &::after {
+      content: attr(aria-label);
+      padding: 0.25rem 0.5rem;
+      white-space: nowrap;
+      pointer-events: none;
+      border-radius: $border-radius;
+      color: $color-fg;
+      background-color: $color-bg;
+    }
+
+    /**
+     * Directions
+     */
+
+    &:not([class*=aria-label-position]),
+    &.aria-label-position-top {
+      &::before,
+      &::after {
+        bottom: 100%;
+        right: 50%;
+        transform: translateX(50%);
+      }
+
+      &::before {
+        border-top-color: $color-bg;
+      }
+
+      &::after {
+        margin-bottom: 1rem;
+      }
+    }
+
+    &.aria-label-position-right {
+      &::before,
+      &::after {
+        top: 50%;
+        left: 100%;
+        transform: translateY(-50%);
+      }
+
+      &::before {
+        border-right-color: $color-bg;
+      }
+
+      &::after {
+        margin-left: 1rem;
+      }
+    }
+
+    &.aria-label-position-bottom {
+      &::before,
+      &::after {
+        top: 100%;
+        right: 50%;
+        transform: translateX(50%);
+      }
+
+      &::before {
+        border-bottom-color: $color-bg;
+      }
+
+      &::after {
+        margin-top: 1rem;
+      }
+    }
+
+    &.aria-label-position-left {
+      &::before,
+      &::after {
+        top: 50%;
+        right: 100%;
+        transform: translateY(-50%);
+      }
+
+      &::before {
+        border-left-color: $color-bg;
+      }
+
+      &::after {
+        margin-right: 1rem;
+      }
+    }
+  }
+
+  [aria-label='']::after, [aria-label='']::before {
+    content: none;
+  }
+
+  [aria-label][aria-label-show] {
+    &::before,
+    &::after {
+      display: block;
+    }
+  }
+
+  /**
+   * Form
+   */
+
+  [data-form-label][aria-label]::after {
+    background-color: $color-bg-warn;
+  }
+
+  [data-form-label][aria-label]::before {
+    border-top-color: $color-bg-warn;
+  }
+}
+
+@mixin interact(
+  $color-fg,
+  $color-fg-active: darken($color-fg, 10%),
+  $color-fg-disabled: lighten($color-fg, 20%)
+) {
+  color: $color-fg;
+  &:hover, &:active, &.active {
+    color: $color-fg-active;
+  }
+  &[disabled] {
+    color: $color-fg-disabled;
+  }
+}
+
+@mixin interact-bg($color-fg, $color-bg) {
+  background-color: $color-bg;
+  color: $color-fg;
+  &:hover, &:active, &.active {
+    background-color: darken($color-bg, 10%);
+    color: darken($color-fg, 10%);
+  }
+  &[disabled] {
+    background-color: lighten($color-bg, 30%);
+  }
+}
+
+@mixin color-scheme (
+  $color-black-04,
+  $color-black-15,
+  $color-black-30,
+  $color-black-54,
+  $color-black-87,
+  $color-white-04,
+  $color-white-15,
+  $color-white-30,
+  $color-white-54,
+  $color-white-87,
+  $color-blue,
+  $color-orange,
+  $color-white,
+  $color-black,
+  $color-green,
+  $color-red,
+  $color-placeholder-light,
+  $color-focus-indicator,
+  $color-focus-indicator-solid
+) {
+  @include sb-color('04',       $color-black-04);
+  @include sb-color('15',       $color-black-15);
+  @include sb-color('30',       $color-black-30);
+  @include sb-color('54',       $color-black-54);
+  @include sb-color('87',       $color-black-87);
+  @include sb-color('white-04', $color-white-04);
+  @include sb-color('white-15', $color-white-15);
+  @include sb-color('white-30', $color-white-30);
+  @include sb-color('white-54', $color-white-54);
+  @include sb-color('white-87', $color-white-87);
+  @include sb-color('blue',     $color-blue);
+  @include sb-color('orange',   $color-orange);
+  @include sb-color('white',    $color-white);
+  @include sb-color('green',    $color-green);
+  @include sb-color('red',      $color-red);
+  @include sb-color('yellow',   $color-yellow);
+
+  .shadow {
+    @include sb-edge('04',    $color-black-04);
+    @include sb-edge('04',    $color-black-04,    inset);
+    @include sb-edge('15',    $color-black-15);
+    @include sb-edge('15',    $color-black-15,    inset);
+    @include sb-edge('30',    $color-black-30,    inset);
+    @include sb-edge('30',    $color-black-30);
+    @include sb-edge('red',   $color-red,   inset);
+    @include sb-edge('blue',  $color-blue,  inset);
+    @include sb-edge('green', $color-green, inset);
+    @include sb-edge('white', $color-white, inset);
+    @include sb-edge('focus', $color-focus-indicator, inset);
+  }
+
+  // Reasons for using box-shadow instead of outline:
+  // 1. In FF, outline bubbles around absolutely positioned children, forming
+  // grotesque shapes.
+  // 2. box-shadow respects border-radius.
+  :focus {
+    outline: none;
+  }
+  .last-input-keyboard :focus {
+    box-shadow: focus-box-shadow($color: $color-focus-indicator);
+  }
+  select:focus {
+    box-shadow: none;
+  }
+  .last-input-keyboard select:focus {
+    outline: -webkit-focus-ring-color auto;
+  }
+
+  .interact-gray-inverse {
+    @extend .bg-white;
+    @extend .fg-54;
+    &:hover, &:focus {
+      @extend .fg-87;
+    }
+
+    &:active, &.active {
+      @extend .bg-54;
+      @extend .fg-white-87;
+    }
+  }
+
+  .interact-blue {
+    @include interact($color-blue);
+  }
+
+  .interact-red {
+    @include interact($color-red);
+  }
+
+  .interact-54 {
+    @include interact($color-black-54, $color-fg-active: $color-black-87, $color-fg-disabled: $color-black-15);
+  }
+
+  .interact-white {
+    background-color: transparent;
+    @include interact($color-white);
+  }
+
+  .interact-bg-04 {
+    @extend .bg-04;
+    @extend .fg-54;
+    &:hover, &:active, &.active {
+      @extend .fg-87;
+    }
+  }
+
+  .interact-04-bg {
+    @extend .bg-white;
+    @extend .fg-87;
+    &:hover, &:focus, &:active, &.active {
+      @extend .bg-04;
+    }
+  }
+
+  .interact-bg-green  {@include interact-bg($color-fg: $color-white, $color-bg: $color-green);}
+  .interact-bg-red    {@include interact-bg($color-fg: $color-white, $color-bg: $color-red);}
+  .interact-bg-blue   {@include interact-bg($color-fg: $color-white, $color-bg: $color-blue);}
+  .interact-bg-orange {@include interact-bg($color-fg: $color-white, $color-bg: $color-orange);}
+
+  .theme-fg-blue {
+    @extend .bg-white;
+    @extend .fg-blue;
+  }
+
+  .theme-fg-orange {
+    @extend .bg-white;
+    @extend .fg-orange;
+  }
+
+  .theme-bg-04 {
+    @extend .bg-04;
+    @extend .fg-87;
+  }
+
+  .theme-bg-white {
+    @extend .bg-white;
+    @extend .fg-87;
+  }
+
+  .theme-bg-blue {
+    @extend .bg-blue;
+    @extend .fg-white;
+  }
+
+  .theme-bg-green {
+    @extend .bg-green;
+    @extend .fg-white;
+  }
+
+  .theme-bg-red {
+    @extend .bg-red;
+    @extend .fg-white;
+  }
+
+  .theme-bg-orange {
+    @extend .bg-orange;
+    @extend .fg-white;
+  }
+
+  .active-theme-bg-blue {
+    &:hover, &:active, &.active {
+      @extend .theme-bg-blue;
+    }
+  }
+
+  .busy-gray {
+    @extend .fg-54;
+    &:hover, &:active {
+      @extend .fg-87;
+      @extend .bg-04;
+    }
+  }
+
+  .input {
+    @extend .edge-in-15;
+    &::placeholder {
+      color: $color-black-30
+    }
+
+    &:focus::placeholder {
+      color: $color-black-15;
+    }
+
+    &:hover {
+      @extend .edge-in-focus;
+    }
+
+    &:focus {
+      box-shadow: focus-box-shadow($color: $color-focus-indicator);
+    }
+
+    &.valid {
+      @extend .edge-in-green;
+    }
+
+    &.error {
+      @extend .edge-in-red;
+    }
+
+    &[disabled] {
+      @extend .bg-04;
+      @extend .fg-30;
+      @extend .edge-in-15;
+    }
+
+    &:-webkit-autofill {
+      box-shadow: inset 0 0 0 1px $color-blue,
+                  inset 0 0 0 2rem white;
+    }
+  }
+
+  .placeholder-color-54::placeholder {
+    @extend .fg-54;
+  }
+
+  @content;
+}
+
+@function focus-box-shadow($color, $thickness: 2px) {
+  @return 0 0 0 $thickness $color;
 }

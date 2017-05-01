@@ -1,0 +1,51 @@
+@import 'node_modules/stylebox/scss/mixins/layout';
+@import 'node_modules/stylebox/scss/mixins/space';
+
+@include sb-flex;
+@include sb-space($min: 0, $max: 4, $step: 0.25);
+
+.center-by-margins {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-width {
+  width: 100%;
+  @extend .center-by-margins;
+  min-width: $page-min-width;
+  // max-width: $page-max-width;
+}
+
+.stretch-to-viewport-v {
+  min-height: 100vh;
+  @extend .col-start-stretch;
+}
+
+.viewport-size {
+  width: 100vw;
+  height: 100vh;
+  @extend .col-start-stretch;
+}
+
+.fix-fit {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.flex-shrink-none {
+  flex-shrink: 0;
+}
+
+.width-2em {
+  width: 2em;
+}
+
+.abs-bottom-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 1rem;
+}

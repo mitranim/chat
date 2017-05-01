@@ -1,209 +1,209 @@
 'use strict'
 
 /**
- * Requires gulp 4.0: https://github.com/gulpjs/gulp/tree/4.0
+ * Dependencies
  */
 
-/* ***************************** Dependencies ********************************/
-
 const $ = require('gulp-load-plugins')()
-const bsync = require('browser-sync').create()
 const del = require('del')
-const flags = require('yargs').boolean('prod').argv
 const gulp = require('gulp')
+const {obj: passthrough} = require('through2')
 const pt = require('path')
 const webpack = require('webpack')
+const {execSync, fork} = require('child_process')
 
-/* ******************************** Globals **********************************/
+const webpackConfig = require('./webpack.config')
+
+/**
+ * Globals
+ */
 
 const src = {
+  root: 'src',
+  static: 'src/static/**/*',
+  staticFonts: 'node_modules/font-awesome/fonts/**/*',
+  staticFontsBase: 'node_modules/font-awesome',
   html: 'src/html/**/*',
   scripts: 'src/scripts/**/*.js',
-  scriptsCore: 'src/scripts/app.js',
-  stylesCore: 'src/styles/app.scss',
-  styles: 'src/styles/**/*.scss',
-  fonts: 'node_modules/font-awesome/fonts/**/*'
+  styleGlobs: ['src/styles/**/*.scss'],
+  styleEntryFiles: ['src/styles/main.scss'],
+  imagesRaster: ['src/images/**/*.{jpg,png,gif}'],
+  imagesVector: ['src/images/**/*.svg'],
 }
 
-const dest = {
-  html: 'dist',
-  styles: 'dist/styles',
+const out = {
+  root: 'dist',
   scripts: 'dist/scripts',
-  fonts: 'dist/fonts'
+  styles: 'dist/styles',
+  images: 'dist/images',
 }
 
-function reload (done) {
-  bsync.reload()
-  done()
+const prod = process.env.NODE_ENV === 'production'
+
+const deploySettings = {
+  analytics: prod,
+  devMode: !prod,
+  errorTracking: prod,
 }
 
-/* ********************************* Tasks ***********************************/
+const autoprefixerSettings = {browsers: ['> 1%', 'IE >= 9', 'iOS 7']}
 
-/* -------------------------------- Scripts ---------------------------------*/
-
-function scripts (done) {
-  const alias = {}
-  if (flags.prod) {
-    alias['react'] = 'react/dist/react.min'
-    alias['react-dom'] = 'react-dom/dist/react-dom.min'
-  }
-
-  webpack({
-    entry: './' + src.scriptsCore,
-    output: {
-      path: pt.join(process.cwd(), dest.scripts),
-      filename: 'app.js'
-    },
-    resolve: {alias},
-    module: {
-      loaders: [
-        {
-          test: /\.jsx?$/,
-          include: [
-            pt.join(process.cwd(), 'src/scripts'),
-            /emerge\/lib/,
-            /prax\/lib/,
-            /rapt\/lib/
-          ],
-          loader: 'babel'
-        }
-      ]
-    },
-    plugins: flags.prod ? [new webpack.optimize.UglifyJsPlugin({compress: {warnings: false}})] : [],
-    // devtool: !flags.prod && typeof done !== 'function' ? 'inline-source-map' : null,
-    watch: typeof done !== 'function'
-  }, function (err, stats) {
-    if (err) {
-      throw new Error(err)
-    } else {
-      const report = stats.toString({
-        colors: true,
-        chunks: false,
-        timings: true,
-        version: false,
-        hash: false,
-        assets: false
-      })
-      if (report) console.log(report)
-    }
-    if (typeof done === 'function') done()
-    else bsync.reload()
-  })
+const cssCleanSettings = {
+  keepSpecialComments: 0,
+  aggressiveMerging: false,
+  advanced: false,
+  // Don't inline `@import: url()`
+  processImport: false,
 }
 
-gulp.task('scripts:build', scripts)
+const versionCmd = 'git rev-parse --short HEAD'
 
-gulp.task('scripts:build:watch', (_) => {scripts()})
+const Err = (key, msg) => new $.util.PluginError(key, msg, {showProperties: false})
 
-/* -------------------------------- Styles ----------------------------------*/
+/**
+ * Clear
+ */
 
-gulp.task('styles:clear', function (done) {
-  del(dest.styles).then((_) => {done()})
-})
-
-gulp.task('styles:compile', function () {
-  return gulp.src(src.stylesCore)
-    .pipe($.plumber())
-    .pipe($.sass())
-    .pipe($.autoprefixer())
-    .pipe($.if(flags.prod, $.minifyCss({
-      keepSpecialComments: 0,
-      aggressiveMerging: false,
-      advanced: false
-    })))
-    .pipe(gulp.dest(dest.styles))
-    .pipe(bsync.stream())
-})
-
-gulp.task('styles:build',
-  gulp.series('styles:clear', 'styles:compile'))
-
-gulp.task('styles:watch', function () {
-  $.watch(src.styles, gulp.series('styles:build'))
-})
-
-/* --------------------------------- HTML -----------------------------------*/
-
-gulp.task('html:clear', function (done) {
-  del(dest.html + '/**/*.html').then((_) => {done()})
-})
-
-gulp.task('html:compile', function () {
-
-  return gulp.src(src.html)
-    .pipe($.plumber())
-    .pipe($.statil({imports: {prod: flags.prod}}))
-    // Change each `<filename>` into `<filename>/index.html`.
-    .pipe($.rename(function (path) {
-      switch (path.basename + path.extname) {
-        case 'index.html': case '404.html': return
-      }
-      path.dirname = pt.join(path.dirname, path.basename)
-      path.basename = 'index'
-    }))
-    .pipe($.if(flags.prod, $.minifyHtml({
-      empty: true
-    })))
-    .pipe(gulp.dest(dest.html))
-})
-
-gulp.task('html:build', gulp.series('html:clear', 'html:compile'))
-
-gulp.task('html:watch', function () {
-  $.watch(src.html, gulp.series('html:build', reload))
-})
-
-/* --------------------------------- Fonts ----------------------------------*/
-
-gulp.task('fonts:clear', function (done) {
-  del(dest.fonts).then((_) => {done()})
-})
-
-gulp.task('fonts:copy', function () {
-  return gulp.src(src.fonts).pipe(gulp.dest(dest.fonts))
-})
-
-gulp.task('fonts:build', gulp.series('fonts:copy'))
-
-gulp.task('fonts:watch', function () {
-  $.watch(src.fonts, gulp.series('fonts:build', reload))
-})
-
-/* -------------------------------- Server ----------------------------------*/
-
-gulp.task('server', function () {
-  return bsync.init({
-    startPath: '/chat/',
-    server: {
-      baseDir: dest.html,
-      middleware: function (req, res, next) {
-        req.url = req.url.replace(/^\/chat/, '/')
-        next()
-      }
-    },
-    port: 3874,
-    online: false,
-    ui: false,
-    files: false,
-    ghostMode: false,
-    notify: false
-  })
-})
-
-/* -------------------------------- Default ---------------------------------*/
-
-if (flags.prod) {
-  gulp.task('build', gulp.parallel(
-    'scripts:build', 'styles:build', 'html:build', 'fonts:build'
-  ))
-} else {
-  gulp.task('build', gulp.parallel(
-    'styles:build', 'html:build', 'fonts:build'
-  ))
-}
-
-gulp.task('watch', gulp.parallel(
-  'scripts:build:watch', 'styles:watch', 'html:watch', 'fonts:watch'
+gulp.task('clear', () => (
+  del(out.root).catch(console.error.bind(console))
 ))
 
-gulp.task('default', gulp.series('build', gulp.parallel('watch', 'server')))
+/**
+ * Static
+ */
+
+gulp.task('static:copy', () => (
+  gulp.src(src.static)
+    .pipe(gulp.src(src.staticFonts, {base: src.staticFontsBase, passthrough: true}))
+    .pipe(gulp.dest(out.root))
+))
+
+gulp.task('static:watch', () => {
+  $.watch([src.static, src.staticFonts], gulp.series('static:copy'))
+})
+
+/**
+ * HTML
+ */
+
+gulp.task('html:build', () => {
+  // const version = execSync(versionCmd).toString().replace(/\n/, '')
+  const version = '0'
+
+  return gulp.src(src.html)
+    .pipe($.statil({
+      imports: {prod, deploySettings, version},
+      pathRename: (path, {dir, name}) => (
+        path === 'index.html' || path === '404.html'
+        ? path
+        : pt.join(dir, name, 'index.html')
+      ),
+    }))
+    .pipe(gulp.dest(out.root))
+})
+
+gulp.task('html:watch', () => {
+  $.watch(src.html, gulp.series('html:build'))
+})
+
+/**
+ * Scripts
+ */
+
+gulp.task('scripts:build', done => {
+  buildWithWebpack(webpackConfig, done)
+})
+
+function buildWithWebpack (config, done) {
+  return webpack(config, (err, stats) => {
+    if (err) {
+      done(Err('webpack', err))
+    } else {
+      $.util.log('[webpack]', stats.toString(config.stats))
+      done(stats.hasErrors() ? Err('webpack', 'plugin error') : null)
+    }
+  })
+}
+
+/**
+ * Styles
+ */
+
+gulp.task('styles:build', () => (
+  gulp.src(src.styleEntryFiles)
+    .pipe($.sass({includePaths: [src.root]}))
+    .pipe($.autoprefixer(autoprefixerSettings))
+    .pipe(!prod ? passthrough() : $.cleanCss(cssCleanSettings))
+    .pipe(gulp.dest(out.styles))
+))
+
+gulp.task('styles:watch', () => {
+  $.watch(src.styleGlobs, gulp.series('styles:build'))
+})
+
+/**
+ * Images
+ */
+
+gulp.task('images:raster', () => (
+  gulp.src(src.imagesRaster)
+    // Requires `graphicsmagick` or `imagemagick`. Install via Homebrew.
+    .pipe($.imageResize({quality: 1}))
+    .pipe(gulp.dest(out.images))
+))
+
+gulp.task('images:vector', () => (
+  gulp.src(src.imagesVector)
+    .pipe($.svgo())
+    .pipe(gulp.dest(out.images))
+))
+
+gulp.task('images:build', gulp.parallel('images:raster', 'images:vector'))
+
+gulp.task('images:watch', () => {
+  $.watch(src.imagesRaster, gulp.series('images:raster'))
+  $.watch(src.imagesVector, gulp.series('images:vector'))
+})
+
+/**
+ * Devserver + Scripts
+ */
+
+gulp.task('devserver', () => {
+  let proc
+
+  process.on('exit', () => {
+    if (proc) proc.kill()
+  })
+
+  function restart () {
+    if (proc) proc.kill()
+    proc = fork('./devserver')
+  }
+
+  restart()
+  $.watch(['./webpack.config.js', './devserver.js'], restart)
+})
+
+/**
+ * Default
+ */
+
+gulp.task('buildup', gulp.parallel(
+  'static:copy',
+  'html:build',
+  'styles:build',
+  'images:build'
+))
+
+gulp.task('watch', gulp.parallel(
+  'static:watch',
+  'html:watch',
+  'styles:watch',
+  'images:watch',
+  'devserver'
+))
+
+gulp.task('build', gulp.series('clear', gulp.parallel('buildup', 'scripts:build')))
+
+gulp.task('default', gulp.series('clear', gulp.parallel('buildup', 'watch')))
