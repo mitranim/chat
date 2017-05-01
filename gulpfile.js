@@ -87,8 +87,7 @@ gulp.task('static:watch', () => {
  */
 
 gulp.task('html:build', () => {
-  // const version = execSync(versionCmd).toString().replace(/\n/, '')
-  const version = '0'
+  const version = execSync(versionCmd).toString().replace(/\n/, '')
 
   return gulp.src(src.html)
     .pipe($.statil({
