@@ -1,5 +1,5 @@
 import {Agent, equal, put} from 'prax'
-import {journal, smoothScrollYToSelector, smoothScrollToTop, patchQuery, addToQuery} from '../utils'
+import {journal, smoothScrollYToSelector, smoothScrollToTop} from '../utils'
 
 export class Nav extends Agent {
   constructor (env) {
@@ -17,22 +17,6 @@ export class Nav extends Agent {
 
   replace (location) {
     journal.replace(location)
-  }
-
-  queryPush (query) {
-    journal.push(patchQuery(journal.location, query))
-  }
-
-  queryReplace (query) {
-    journal.replace(patchQuery(journal.location, query))
-  }
-
-  queryKeyPush (key, query) {
-    journal.push(addToQuery(journal.location, key, query))
-  }
-
-  queryKeyReplace (key, query) {
-    journal.replace(addToQuery(journal.location, key, query))
   }
 
   deinit () {

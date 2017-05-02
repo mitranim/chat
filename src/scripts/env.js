@@ -1,4 +1,4 @@
-const {Agent, MessageQue, derefIn, deinit} = require('prax')
+const {Agent, MessageQue, derefIn} = require('prax')
 const {Nav} = require('./features/nav')
 const {Dom} = require('./features/dom')
 const {Auth} = require('./features/auth')
@@ -18,7 +18,7 @@ export class Env extends Agent {
       dom: new Dom(this),
     })
 
-    deinit(prevEnv)
+    if (prevEnv) prevEnv.deinit()
 
     this.deref().dom.init()
   }

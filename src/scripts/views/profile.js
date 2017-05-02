@@ -1,6 +1,5 @@
 import {PraxComponent} from 'prax'
 import {LoginButtons} from './auth'
-import {PageHeader} from './misc'
 import {LoadingIndicator} from './loading-indicator'
 
 export class Profile extends PraxComponent {
@@ -27,11 +26,11 @@ class ProfilePage extends PraxComponent {
 
     return (
       <div className='children-margin-1-v'>
-        <PageHeader className='row-between-center children-margin-1-h'>
+        <h2 className='row-between-center children-margin-1-h'>
           <span>Profile</span>
           {!synced ?
           <LoadingIndicator className='font-1' /> : null}
-        </PageHeader>
+        </h2>
         <div>Welcome, {user.displayName}!</div>
       </div>
     )

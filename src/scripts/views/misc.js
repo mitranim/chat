@@ -21,10 +21,6 @@ export function Button ({children, ...props}) {
   )
 }
 
-export function PageHeader (props) {
-  return <h2 {...props} />
-}
-
 export class ErrorPanels extends PraxComponent {
   subrender () {
     const {props: {errors}} = this

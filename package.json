@@ -59,7 +59,7 @@
     "http-proxy": "1.16.2",
     "lodash": "4.17.4",
     "normalize.css": "6.0.0",
-    "prax": "0.0.103",
+    "prax": "0.0.104",
     "react": "15.5.4",
     "react-dom": "15.5.4",
     "react-router-dom": "4.1.1",
@@ -68,7 +68,6 @@
     "transform-loader": "0.2.4",
     "webpack": "2.4.1",
     "webpack-dev-middleware": "1.10.2",
-    "webpack-hot-middleware": "2.18.0",
-    "xhttp": "0.5.0"
+    "webpack-hot-middleware": "2.18.0"
   }
 }
