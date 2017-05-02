@@ -11,6 +11,7 @@ export class Dom extends Agent {
 
   init () {
     const {env} = this
+    const {mq} = env.deref()
     const {cleanup} = this.deref()
 
     PraxComponent.prototype.env = env
@@ -25,7 +26,7 @@ export class Dom extends Agent {
     }
 
     cleanup.push(seq(
-      addEvent(window, 'keydown', pipeAnd(eventKeyName, keyEvent, env.mq.send)),
+      addEvent(window, 'keydown', pipeAnd(eventKeyName, keyEvent, mq.push)),
 
       addEvent(window, 'keydown', seq(
         bind(removeClass, 'last-input-mouse', document.body),
