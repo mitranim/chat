@@ -36,7 +36,11 @@ export class MessageForm extends Agent {
 
     this.swap(patch, {
       msgRef: firebase.database().ref('messages').push(message, error => {
-        this.swap(patch, {msgRef: null, fields: null, error})
+        this.swap(patch, {
+          msgRef: null,
+          fields: error ? this.deref().fields : null,
+          error,
+        })
       }),
     })
   }

@@ -17,32 +17,33 @@ export class Participants extends PraxComponent {
     const isAnon = authSynced && !user
 
     return (
-      <div {...mix({className: 'col-start-stretch children-margin-1-v'}, props)}>
-        <h3>Participants</h3>
+      <div {...mix({className: 'col-start-stretch children-margin-1-v padding-1'}, props)}>
+        <h2 className='row-between-center children-margin-1-h'>
+          <span>Participants</span>
+          <LoadingIndicator enabled={!synced && !error} />
+        </h2>
+
         {error ?
         <ErrorPanels errors={[error]} /> : null}
 
-        {!participants && !synced && !error ?
-        <div className='row-center-center'>
-          <LoadingIndicator className='font-1' />
-        </div> :
-
-        !participants && isAnon && !error ?
+        {!participants && synced && isAnon && !error ?
         <div className='flex-1 col-center-center text-center children-margin-0x5-v'>
           <h4>The chatroom is empty. Login to join!</h4>
           <LoginButtons />
         </div> :
 
-        !participants && !error ?
+        !participants && synced && !error ?
         <div className='flex-1 col-center-center text-center children-margin-0x5-v'>
           <h4>The chatroom is empty. You should be listed here, which means something went wrong. Oops!</h4>
         </div> :
 
+        synced ?
         <div className='children-margin-1-v overflow-y-scroll'>
           {_.map(participants, (participant, key) => (
             <Participant participant={participant} key={key} />
           ))}
-        </div>}
+        </div>
+        : null}
       </div>
     )
   }

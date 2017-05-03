@@ -42,36 +42,19 @@
   background-color: rgba($color-red, 0.05);
 }
 
-.popping-3 {
-  .popping:nth-child(2) {
-    animation-delay: 0.3s;
-  }
-  .popping:nth-child(3) {
-    animation-delay: 0.6s;
-  }
-  .popping {
-    display: inline-block;
-    color: $color-blue;
-    animation-name: popAnimation3;
-    animation-duration: 0.9s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-out;
-  }
-
-  @keyframes popAnimation3 {
-    0% {
-      transform: scale(1);
-    }
-    33% {
-      transform: scale(1.4);
-    }
-    50%, 100% {
-      transform: scale(1);
-    }
-  }
+.transition-0x2 {
+  transition: all 0.2s ease-out;
 }
 
-.children-margin-popping > :not(:first-child) {
+.scale-up {
+  transform: scale(1.6);
+}
+
+.scale-none {
+  transform: none;
+}
+
+.children-margin-scale-up-h > :not(:first-child) {
   margin-left: 0.3em;
 }
 

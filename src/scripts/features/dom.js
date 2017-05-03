@@ -1,4 +1,4 @@
-const ReactDOM = require('react-dom')
+const {render} = require('react-dom')
 const {Agent, PraxComponent, seq, pipeAnd, bind} = require('prax')
 const {CleanupQue, addEvent, removeClass, addClass, eventKeyName} = require('../utils')
 const {Root} = require('../views')
@@ -18,12 +18,10 @@ export class Dom extends Agent {
 
     const rootNode = document.getElementById('root')
 
-    if (rootNode) {
-      ReactDOM.render(<Root />, rootNode)
-      cleanup.push(() => {
-        ReactDOM.unmountComponentAtNode(rootNode)
-      })
-    }
+    // Assuming the root never changes (it's hardcoded into index.html), we
+    // don't need to unmount on cleanup. Just render over it; react-router 4+
+    // happily supports this.
+    if (rootNode) render(<Root />, rootNode)
 
     cleanup.push(seq(
       addEvent(window, 'keydown', pipeAnd(eventKeyName, keyEvent, mq.push)),

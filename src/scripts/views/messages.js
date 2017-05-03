@@ -22,22 +22,22 @@ export class Messages extends PraxComponent {
     const error = deref(byPath(refs.messages, ['error']))
 
     return (
-      <div {...mix({className: 'col-between-stretch children-margin-1-v'}, props)}>
+      <div {...mix({className: 'col-between-stretch children-margin-1-v padding-1'}, props)}>
         <div className='flex-1 col-start-stretch children-margin-1-v'>
-          <h3>Messages</h3>
+          <h2 className='row-between-center children-margin-1-h'>
+            <span>Messages</span>
+            <LoadingIndicator enabled={!synced && !error} />
+          </h2>
+
           {error ?
           <ErrorPanels errors={[error]} /> : null}
 
-          {_.isEmpty(messages) && !synced && !error ?
-          <div className='row-center-center'>
-            <LoadingIndicator className='font-1' />
-          </div> :
-
-          _.isEmpty(messages) && !error ?
+          {_.isEmpty(messages) && synced && !error ?
           <div className='flex-1 row-center-center text-center'>
             <h3>The chat is empty. Leave the first message!</h3>
           </div> :
 
+          synced ?
           <div className='flex-1 relative col-between-stretch'>
             <div
               className='children-margin-1-v overflow-y-scroll'
@@ -54,7 +54,8 @@ export class Messages extends PraxComponent {
               onClick={this.scrollToBottom}>
               <span className='fa fa-chevron-down' />
             </button> : null}
-          </div>}
+          </div>
+          : null}
         </div>
 
         <MessageDeleteModal />
@@ -211,7 +212,7 @@ class MessageForm extends PraxComponent {
             })}
             onKeyDown={ifthen(isEscapeEvent, messageForm.clear.bind(messageForm))} />
           {sending ?
-          <LoadingIndicator className='flex-1 padding-0x5' /> :
+          <LoadingIndicator enabled className='flex-1 padding-0x5' /> :
           <button
             type='submit'
             className={`flex-1 padding-0x5 ${inert ? 'fg-54' : 'fg-87'}`}
