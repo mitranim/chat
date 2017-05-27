@@ -33,19 +33,21 @@ th {
  * :focus
  */
 
-// Replace outline with box-shadow.
 :focus {
   outline: none;
+}
+
+.last-input-keyboard :focus {
   box-shadow: 0 0 0 2px skyblue;
+}
+
+.last-input-keyboard select:focus {
+  box-shadow: none;
+  outline: -webkit-focus-ring-color auto;
 }
 
 // FF
 ::-moz-focus-inner {border: none}
-
-select:focus {
-  box-shadow: none;
-  outline: -webkit-focus-ring-color auto;
-}
 
 /**
  * button

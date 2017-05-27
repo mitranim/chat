@@ -189,6 +189,8 @@ export function eventKeyName ({keyCode}) {
   return KEY_NAMES_US[keyCode]
 }
 
+export const isEscapeEvent = pipe(eventKeyName, test('Escape'))
+
 export function fbOn ({ref, type, onNext, onError}) {
   validate(isObject, ref)
   validate(isFunction, onNext)
@@ -220,16 +222,22 @@ export function formatTime (timestamp) {
   return match ? match[1] : ''
 }
 
+export function reachedTop ({scrollTop}) {
+  return scrollTop < PX_ERROR_MARGIN
+}
+
 export function reachedBottom (elem) {
-  const distanceToBottomEdge = elem.scrollHeight - (elem.clientHeight + elem.scrollTop)
-  return Math.abs(distanceToBottomEdge) <= PX_ERROR_MARGIN
+  return Math.abs(getScrollBottom(elem)) < PX_ERROR_MARGIN
+}
+
+// Opposite of `elem.scrollTop`.
+export function getScrollBottom ({scrollHeight, clientHeight, scrollTop}) {
+  return scrollHeight - (clientHeight + scrollTop)
 }
 
 export function stopPropagation (event) {
   event.stopPropagation()
 }
-
-export const isEscapeEvent = pipe(eventKeyName, test('Escape'))
 
 export class Interval {
   constructor (delay, fun) {

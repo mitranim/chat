@@ -75,7 +75,6 @@
   },
   "globals": {
     "_": true,
-    "Promise": true,
     "React": true
   }
 }

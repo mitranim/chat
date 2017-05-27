@@ -14,9 +14,10 @@ export class Header extends PraxComponent {
         </div> */}
         <div className='padding-1 row-center-center font-3'>Chat Demo</div>
         <div className='flex-1' />
-        <LoadingIndicator enabled={!user && !synced} className='font-1 padding-0x5' />
         {user ?
         <UserInfo user={user} /> :
+        !synced ?
+        <LoadingIndicator enabled className='font-1 padding-0x5' /> :
         <LoginButtons />}
       </div>
     )

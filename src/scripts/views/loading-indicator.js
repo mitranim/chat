@@ -1,37 +1,7 @@
 import {findDOMNode} from 'react-dom'
-import {PraxComponent, isFunction} from 'prax'
+import {PraxComponent} from 'prax'
 
 export class LoadingIndicator extends PraxComponent {
-  constructor () {
-    super(...arguments)
-    this.onCycleEnd = this.onCycleEnd.bind(this)
-  }
-
-  subrender () {
-    const {props: {enabled: __, ...props}, state: {enabled}} = this
-
-    if (!enabled) return null
-
-    return (
-      <LoadingIndicatorJS {...props} onCycleEnd={this.onCycleEnd} />
-    )
-  }
-
-  componentWillMount () {
-    this.setState({enabled: this.props.enabled})
-  }
-
-  componentWillReceiveProps ({enabled}) {
-    if (enabled) this.setState({enabled})
-  }
-
-  onCycleEnd (loadingIndicator) {
-    if (this.props.enabled) loadingIndicator.startCycle()
-    else this.setState({enabled: false})
-  }
-}
-
-export class LoadingIndicatorJS extends PraxComponent {
   constructor () {
     super(...arguments)
     this.startCycle = this.startCycle.bind(this)
@@ -39,28 +9,31 @@ export class LoadingIndicatorJS extends PraxComponent {
   }
 
   subrender () {
+    if (!this.state || !this.state.visible) return null
+
     const {className, style} = this.props
+
     return (
       <span
-        className={`row-center-center children-margin-scale-up-h ${className || ''}`}
+        className={`row-center-center children-margin-letter-h flex-shrink-none ${className || ''}`}
         style={style}
         onTransitionEnd={this.onTransitionEnd}>
-        <span className='inline-block fg-blue transition-0x2'>●</span>
-        <span className='inline-block fg-blue transition-0x2'>●</span>
-        <span className='inline-block fg-blue transition-0x2'>●</span>
+        <span style={pipStyle}>●</span>
+        <span style={pipStyle}>●</span>
+        <span style={pipStyle}>●</span>
       </span>
     )
   }
 
-  componentDidMount () {
-    // Delaying by one frame ensures the CSS transitions will actually animate.
-    // Otherwise they finish instantly.
-    this.timerId = requestAnimationFrame(this.startCycle)
-  }
-
-  componentWillUnmount () {
-    cancelAnimationFrame(this.timerId)
-    super.componentWillUnmount()
+  setup ({enabled}) {
+    if (enabled && !(this.state && this.state.visible)) {
+      this.setState({visible: true})
+      // Delaying by one frame ensures the CSS transitions will actually
+      // animate. It appears that CSS transitions finish instantly if started in
+      // the same call stack where the DOM nodes were created.
+      cancelAnimationFrame(this.timerId)
+      this.timerId = requestAnimationFrame(this.startCycle)
+    }
   }
 
   startCycle () {
@@ -69,36 +42,42 @@ export class LoadingIndicatorJS extends PraxComponent {
   }
 
   onTransitionEnd ({target: pip}) {
-    const {props: {onCycleEnd}} = this
     const nextPip = pip.nextElementSibling
 
     if (isScaledUp(pip)) {
       scaleDown(pip)
       if (nextPip) scaleUp(nextPip)
+      return
     }
-    else if (isScaledDown(pip) && !nextPip && isFunction(onCycleEnd)) {
-      onCycleEnd(this)
+
+    const finishedFullCycle = isScaledDown(pip) && !nextPip
+
+    if (finishedFullCycle) {
+      if (this.props.enabled) this.startCycle()
+      else this.setState({visible: false})
     }
+  }
+
+  componentWillUnmount () {
+    cancelAnimationFrame(this.timerId)
+    super.componentWillUnmount()
   }
 }
 
-const scaleUpClass = 'scale-up'
-const scaleDownClass = 'scale-none'
+const pipStyle = {display: 'inline-block', transition: 'all 0.2s ease-out'}
 
 function isScaledUp (elem) {
-  return elem.classList.contains(scaleUpClass)
+  return /scale/.test(elem.style.transform)
 }
 
 function isScaledDown (elem) {
-  return elem.classList.contains(scaleDownClass)
+  return !isScaledUp(elem)
 }
 
 function scaleUp (elem) {
-  elem.classList.remove(scaleDownClass)
-  elem.classList.add(scaleUpClass)
+  elem.style.transform = 'scale(1.5)'
 }
 
 function scaleDown (elem) {
-  elem.classList.remove(scaleUpClass)
-  elem.classList.add(scaleDownClass)
+  elem.style.transform = ''
 }

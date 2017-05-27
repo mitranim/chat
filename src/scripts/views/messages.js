@@ -94,7 +94,7 @@ class Message extends PraxComponent {
     const {props: {messageId, message: {author: {uid, displayName, photoURL}, body, createdAt}}} = this
     const refs = this.env.deref()
     const userId = deref(byPath(refs.auth, ['user', 'uid']))
-    const my = uid === userId
+    const my = userId && (uid === userId)
 
     return (
       <div className='row-between-stretch children-margin-0x5-h'>
